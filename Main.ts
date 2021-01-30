@@ -5,17 +5,29 @@ namespace UfoundLost {
   window.addEventListener("load", start);
 
 
-  export let viewport: ƒ.Viewport = new ƒ.Viewport();
-  export let graph: ƒ.Node = new ƒ.Node("MainGraph");
-  let yCamera: number = 4;
-  let ufoSpaceDefinition = {height: 7, size: new ƒ.Vector3(16, 2, 9)};
-  let heliSpaceDefinition = {height: 2, size: new ƒ.Vector3(16, 0.5, 9)};
+  export const viewport: ƒ.Viewport = new ƒ.Viewport();
+  export const graph: ƒ.Node = new ƒ.Node("MainGraph");
+  const yCamera: number = 4;
+  const ufoSpaceDefinition = { height: 7, size: new ƒ.Vector3(16, 2, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+  const heliSpaceDefinition = { height: 2, size: new ƒ.Vector3(16, 0.5, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+
+  let crosshair: GameObject;
+  let crosshairTarget: GameObject;
+
+  const cntFlak = {
+    x: new ƒ.Control("FlakX", 0.05),
+    z: new ƒ.Control("FlakZ", 0.05),
+    y: new ƒ.Control("FlakY", -0.001)
+  };
 
   function start(_event: Event): void {
     ƒ.Debug.fudge("UfoundLost starts");
 
     createViewport();
+    createFlak();
     createScene();
+
+    setupInteraction();
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();
@@ -23,7 +35,38 @@ namespace UfoundLost {
 
   function update(_event: Event): void {
     ƒ.Debug.fudge("udpate");
+    let timeslice = ƒ.Loop.timeFrameGame / 1000;
+
+    crosshair.setTargetPosition(crosshairTarget.mtxLocal.translation);
+    crosshair.update(timeslice);
+
     viewport.draw();
+  }
+
+  function setupInteraction(): void {
+    let canvas: HTMLCanvasElement | null = document.querySelector("canvas");
+    if (!canvas)
+      return;
+
+    canvas.addEventListener("mousemove", hndMouse);
+    canvas.addEventListener("wheel", hndMouse);
+    canvas.addEventListener("click", canvas.requestPointerLock);
+    canvas.addEventListener("click", shoot);
+  }
+
+  function hndMouse(_event: MouseEvent | WheelEvent): void {
+    cntFlak.x.setInput(_event.movementX);
+    cntFlak.z.setInput(_event.movementY);
+    if (_event.type == "wheel")
+      cntFlak.y.setInput((<WheelEvent>_event).deltaY);
+
+    let move: ƒ.Vector3 = new ƒ.Vector3(cntFlak.x.getOutput(), cntFlak.y.getOutput(), cntFlak.z.getOutput());
+    crosshairTarget.mtxLocal.translate(move);
+    crosshairTarget.restrictPosition(ufoSpaceDefinition.min, ufoSpaceDefinition.max);
+  }
+
+  function shoot(_event: MouseEvent): void {
+    
   }
 
   function createViewport(): void {
@@ -37,6 +80,15 @@ namespace UfoundLost {
     cmpCamera.backgroundColor = ƒ.Color.CSS("black");
 
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
+  }
+
+  function createFlak(): void {
+    let mtrCrosshair: ƒ.Material = new ƒ.Material("Crosshair", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("White")));
+    crosshair = new GameObject("Crosshair", ƒ.Vector3.Y(ufoSpaceDefinition.height), mtrCrosshair);
+    graph.appendChild(crosshair);
+
+    crosshairTarget = new GameObject("CrosshairTarget", ƒ.Vector3.Y(ufoSpaceDefinition.height - 2), mtrCrosshair, new ƒ.Vector2(0.5, 0.5));
+    graph.appendChild(crosshairTarget);
   }
 
   function createScene(): void {
@@ -64,19 +116,26 @@ namespace UfoundLost {
         graph.appendChild(floor);
       }
     }
-    
+
     let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
 
     let ufoSpace: ƒ.Node = new ƒAid.Node("UfoSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, ufoSpaceDefinition.height, 0)), mtrWhite, meshCube);
-    let cmpMesh: ƒ.ComponentMesh = ufoSpace.getComponent(ƒ.ComponentMesh);
-    cmpMesh.pivot.scale(ufoSpaceDefinition.size);
+    let cmpMeshUfoSpace: ƒ.ComponentMesh = ufoSpace.getComponent(ƒ.ComponentMesh);
+    cmpMeshUfoSpace.pivot.scale(ufoSpaceDefinition.size);
     ufoSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("red", 0.5);
     graph.appendChild(ufoSpace);
 
     let heliSpace: ƒ.Node = new ƒAid.Node("HeliSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, heliSpaceDefinition.height, 0)), mtrWhite, meshCube);
-    cmpMesh = heliSpace.getComponent(ƒ.ComponentMesh);
-    cmpMesh.pivot.scale(heliSpaceDefinition.size);
+    let cmpMeshHeliSpace: ƒ.ComponentMesh = heliSpace.getComponent(ƒ.ComponentMesh);
+    cmpMeshHeliSpace.pivot.scale(heliSpaceDefinition.size);
     heliSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("grey", 0.5);
     graph.appendChild(heliSpace);
+
+    viewport.draw(); // to calculate world transforms
+
+    ufoSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshUfoSpace.mtxWorld);
+    ufoSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshUfoSpace.mtxWorld);
+    heliSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliSpace.mtxWorld);
+    heliSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliSpace.mtxWorld);
   }
 }
