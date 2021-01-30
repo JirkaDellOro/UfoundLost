@@ -7,6 +7,8 @@ var UfoundLost;
     UfoundLost.viewport = new ƒ.Viewport();
     UfoundLost.graph = new ƒ.Node("MainGraph");
     let yCamera = 4;
+    let ufoSpaceDefinition = { height: 7, size: new ƒ.Vector3(16, 2, 9) };
+    let heliSpaceDefinition = { height: 2, size: new ƒ.Vector3(16, 0.5, 9) };
     function start(_event) {
         ƒ.Debug.fudge("UfoundLost starts");
         createViewport();
@@ -37,6 +39,7 @@ var UfoundLost;
         background.mtxLocal.translate(new ƒ.Vector3(0, yCamera, -5));
         background.mtxLocal.scale(new ƒ.Vector3(16, 9, 1));
         background.mtxLocal.scale(ƒ.Vector3.ONE(1.6));
+        background.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("darkblue");
         // background.mtxLocal.lookAt(viewport.camera.pivot.translation);
         UfoundLost.graph.appendChild(background);
         for (let x = -8; x <= 8; x++) {
@@ -49,5 +52,16 @@ var UfoundLost;
                 UfoundLost.graph.appendChild(floor);
             }
         }
+        let meshCube = new ƒ.MeshCube();
+        let ufoSpace = new ƒAid.Node("UfoSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, ufoSpaceDefinition.height, 0)), mtrWhite, meshCube);
+        let cmpMesh = ufoSpace.getComponent(ƒ.ComponentMesh);
+        cmpMesh.pivot.scale(ufoSpaceDefinition.size);
+        ufoSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("red", 0.5);
+        UfoundLost.graph.appendChild(ufoSpace);
+        let heliSpace = new ƒAid.Node("HeliSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, heliSpaceDefinition.height, 0)), mtrWhite, meshCube);
+        cmpMesh = heliSpace.getComponent(ƒ.ComponentMesh);
+        cmpMesh.pivot.scale(heliSpaceDefinition.size);
+        heliSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("grey", 0.5);
+        UfoundLost.graph.appendChild(heliSpace);
     }
 })(UfoundLost || (UfoundLost = {}));
