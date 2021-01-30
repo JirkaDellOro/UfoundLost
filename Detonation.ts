@@ -1,20 +1,20 @@
+///<reference path="GameObject.ts"/>
 namespace UfoundLost {
   import ƒAid = FudgeAid;
-  export class Detonation extends ƒAid.Node {
-    private static mesh: ƒ.MeshSphere = new ƒ.MeshSphere("Detonation", 10, 10);
-    private static material: ƒ.Material = new ƒ.Material("Detonation", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("gray")));
-    // private static material: ƒ.Material = new ƒ.Material("Detonation", ƒ.ShaderTexture,
-    //   new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/Smoke.png"))
-    // );
+  export class Detonation extends GameObject {
+    private static material: ƒ.Material = new ƒ.Material("Detonation", ƒ.ShaderTexture,
+      new ƒ.CoatTextured(new ƒ.Color(1, 0.4, 0.2), new ƒ.TextureImage("Images/Smoke.png"))
+    );
     private static radius: number = 2;
 
     constructor(_position: ƒ.Vector3) {
-      super("Detonation", ƒ.Matrix4x4.TRANSLATION(_position), Detonation.material, Detonation.mesh);
-      this.getComponent(ƒ.ComponentMesh).pivot.scaling = ƒ.Vector3.ONE(Detonation.radius);
+      super("Detonation", _position, Detonation.material, ƒ.Vector2.ONE(Detonation.radius));
       // this.getComponent(ƒ.ComponentMaterial).pivot.scaling = ƒ.Vector2.ONE(10);
+      this.velocity = ƒ.Vector3.Y(0.3);
     }
 
     public update(_timeslice: number): boolean {
+      super.update(_timeslice);
       let cmpMaterial = this.getComponent(ƒ.ComponentMaterial);
       cmpMaterial.clrPrimary.a -= _timeslice;
       return (cmpMaterial.clrPrimary.a < 0)

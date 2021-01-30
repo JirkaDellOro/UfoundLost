@@ -110,6 +110,7 @@ namespace UfoundLost {
   function createScene(): void {
     let origin: ƒAid.NodeCoordinateSystem = new ƒAid.NodeCoordinateSystem("Origin");
     // graph.appendChild(origin);
+    ƒAid.addStandardLightComponents(graph);
 
 
     let meshQuad: ƒ.MeshQuad = new ƒ.MeshQuad();
