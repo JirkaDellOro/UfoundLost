@@ -22,8 +22,21 @@ A small design document was created to nail down some core functionality and beh
 </object>
 
 ## Day 4
-Downloaded some audio from https://freesound.org/  
-
-Programming started! Here is the first generated scene displaying the space the objects are supposed to move in.
+Started at 7.00 (7am)
+### 9.00 (10am)
+- Downloaded some audio from https://freesound.org/  
+- Started the Github-Repository
+- Programming started! Here is the first generated scene displaying the space the objects are supposed to move in.
 
 ![](Docu/Spaces.png)
+
+[Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/94f596fed257a97009c3de4488d8909333c6d50a)
+
+### 15.00 (3pm)
+Ellie has sent some more sprites and a new background
+![](Docu/Background2.png)
+
+The controls are pretty much done, so far solely with placeholders. The mouse controls a target point the crosshair slowly moves towards. On mouseclick, a flak projectile detonates at the crosshair position. The pack of helicopters is controlled by the keyboard. Starting and landing in the middle of the town is not implemented yet. 
+![](Docu/Controls.gif)  
+
+[Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/cc46f98537252cf08e12f2bf65d5400810d82ecb)
