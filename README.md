@@ -1,6 +1,8 @@
 # UfoundLost
 A 50's B-movie alien invasion horror game made with FUDGE during the global game jam 2021
 
+**[Play the current prototype](UfoundLost.html)**
+
 ## Day 1
 Coming up with ideas for the theme "Lost And Found". Instead of having the player losing things in the game and finding them again, one idea was to make others lose stuff and try to find or catch it. 
 
