@@ -2993,6 +2993,10 @@ declare namespace FudgeCore {
          */
         getIndex<T>(_array: Array<T>): number;
         /**
+         * Returns a randomly selected element of the given array
+         */
+        getElement<T>(_array: Array<T>): T;
+        /**
          * Removes a randomly selected element from the given array and returns it
          */
         splice<T>(_array: Array<T>): T;

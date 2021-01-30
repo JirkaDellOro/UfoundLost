@@ -5,6 +5,11 @@ namespace UfoundLost {
   }
 
   export class Ufo extends GameObject {
+    private static audioMoves: ƒ.Audio[] = [
+      new ƒ.Audio("Audio/UfoMove0.mp3"), new ƒ.Audio("Audio/UfoMove1.mp3"), new ƒ.Audio("Audio/UfoMove2.mp3")
+    ];
+    private static audioPrepare: ƒ.Audio = new ƒ.Audio("Audio/Ufo0.mp3");
+    private static audioTractor: ƒ.Audio = new ƒ.Audio("Audio/Beam0.mp3");
     // private static material: ƒ.Material = new ƒ.Material("Ufo", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("black", 0.5)));
     // private static mtrTractor: ƒ.Material = new ƒ.Material("Ufo", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("pink", 0.5)));
     private static material: ƒ.Material = new ƒ.Material("Ufo", ƒ.ShaderTexture,
@@ -23,6 +28,8 @@ namespace UfoundLost {
       this.job = JOB.ROAM;
       this.maxVelocity = 5;
       this.findTargetPosition();
+
+      this.addComponent(new ƒ.ComponentAudio())
     }
 
     public update(_timeslice: number): void {
@@ -31,6 +38,8 @@ namespace UfoundLost {
       let position: ƒ.Vector3 = this.mtxLocal.translation;
       let atTarget: boolean = this.mtxLocal.translation.isInsideSphere(this.posTarget, 2 * _timeslice * this.maxVelocity);
       let jobPrevious: JOB = this.job;
+      let cmpAudio: ƒ.ComponentAudio = this.getComponent(ƒ.ComponentAudio);
+
       switch (this.job) {
         case JOB.ROAM:
           if (!atTarget) break; // keep roamin
@@ -44,10 +53,16 @@ namespace UfoundLost {
             this.maxVelocity = 1;
             this.setTargetPosition(new ƒ.Vector3(position.x, ufoSpaceDefinition.min.y, position.z));
             this.job = JOB.PREPARE;
+            cmpAudio.setAudio(Ufo.audioPrepare);
+            cmpAudio.volume = 0.1;
+            cmpAudio.play(true);
             break;
           }
           this.findTargetPosition();
           this.job = JOB.ROAM;
+          cmpAudio.volume = 1;
+          cmpAudio.setAudio(ƒ.Random.default.getElement(Ufo.audioMoves));
+          cmpAudio.play(true);
           break;
         case JOB.PREPARE:
           if (!atTarget) break; // keep preparing
@@ -55,6 +70,9 @@ namespace UfoundLost {
           this.velocity = ƒ.Vector3.ZERO();
           this.tractor.getComponent(ƒ.ComponentMesh).activate(true);
           this.timeForNextJob = ƒ.Time.game.get() + 1000 * ƒ.Random.default.getRange(10, 15);
+          cmpAudio.volume = 0.5;
+          cmpAudio.setAudio(Ufo.audioTractor);
+          cmpAudio.play(true);
           break;
         case JOB.TRACTOR:
           if (ƒ.Time.game.get() < this.timeForNextJob) break; // keep sucking
@@ -64,8 +82,8 @@ namespace UfoundLost {
           this.job = JOB.ROAM;
           break;
       }
-      if (jobPrevious != this.job)
-        ƒ.Debug.fudge(JOB[this.job]);
+      // if (jobPrevious != this.job)
+      //   ƒ.Debug.fudge(JOB[this.job]);
     }
 
     public createTractorBeam(): GameObject {
@@ -77,7 +95,7 @@ namespace UfoundLost {
       this.tractor.mtxLocal.scaleX(0.5);
       this.tractor.mtxLocal.scaleY(ufoSpaceDefinition.min.y);
       cmpMesh.activate(false);
-      
+
       let cmpMaterial: ƒ.ComponentMaterial = this.tractor.getComponent(ƒ.ComponentMaterial);
       cmpMaterial.pivot.scaleY(5);
       this.appendChild(this.tractor);

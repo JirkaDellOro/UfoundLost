@@ -55,6 +55,10 @@ var UfoundLost;
             super("Detonation", _position, Detonation.material, ƒ.Vector2.ONE(Detonation.radius));
             // this.getComponent(ƒ.ComponentMaterial).pivot.scaling = ƒ.Vector2.ONE(10);
             this.velocity = ƒ.Vector3.Y(0.3);
+            let cmpAudio = new ƒ.ComponentAudio(Detonation.audio);
+            this.addComponent(cmpAudio);
+            cmpAudio.play(true);
+            // window.setTimeout(() => cmpAudio.play(true), 100);
         }
         update(_timeslice) {
             super.update(_timeslice);
@@ -63,6 +67,7 @@ var UfoundLost;
             return (cmpMaterial.clrPrimary.a < 0);
         }
     }
+    Detonation.audio = new ƒ.Audio("Audio/Detonation.mp3");
     Detonation.material = new ƒ.Material("Detonation", ƒ.ShaderTexture, new ƒ.CoatTextured(new ƒ.Color(1, 0.4, 0.2), new ƒ.TextureImage("Images/Smoke.png")));
     Detonation.radius = 2;
     UfoundLost.Detonation = Detonation;
@@ -71,18 +76,21 @@ var UfoundLost;
 (function (UfoundLost) {
     var ƒAid = FudgeAid;
     class Flak extends ƒ.Node {
+        // private static audioShot: ƒ.Audio = new ƒ.Audio("Audio/Shot.mp3");
         constructor() {
             super("FlakGraph");
             let mtrCrosshair = new ƒ.Material("Crosshair", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("White"), new ƒ.TextureImage("Images/Crosshair.png")));
             this.crosshair = new UfoundLost.GameObject("Crosshair", ƒ.Vector3.Y(UfoundLost.ufoSpaceDefinition.height), mtrCrosshair, ƒ.Vector2.ONE(0.5));
             this.crosshair.maxVelocity = 3;
             this.appendChild(this.crosshair);
-            this.crosshairTarget = new UfoundLost.GameObject("CrosshairTarget", ƒ.Vector3.Y(UfoundLost.ufoSpaceDefinition.height - 2), mtrCrosshair, ƒ.Vector2.ONE(0.3));
+            this.crosshairTarget = new UfoundLost.GameObject("CrosshairTarget", ƒ.Vector3.Y(UfoundLost.ufoSpaceDefinition.height), mtrCrosshair, ƒ.Vector2.ONE(0.3));
             this.appendChild(this.crosshairTarget);
             this.detonations = new ƒ.Node("Detonations");
             this.appendChild(this.detonations);
             this.cannon = this.createCannon();
             this.appendChild(this.cannon);
+            this.input(0.01, 0, 0);
+            // this.addComponent(new ƒ.ComponentAudio(Flak.audioShot));
         }
         update(_timeslice) {
             this.crosshair.setTargetPosition(this.crosshairTarget.mtxLocal.translation);
@@ -101,6 +109,7 @@ var UfoundLost;
             let move = new ƒ.Vector3(_x, _y, _z);
             this.crosshairTarget.mtxLocal.translate(move);
             this.crosshairTarget.restrictPosition(UfoundLost.ufoSpaceDefinition.min, UfoundLost.ufoSpaceDefinition.max);
+            this.crosshair.restrictPosition(UfoundLost.ufoSpaceDefinition.min, UfoundLost.ufoSpaceDefinition.max);
         }
         shoot() {
             ƒ.Debug.fudge("shoot");
@@ -108,6 +117,7 @@ var UfoundLost;
             this.detonations.appendChild(detonation);
             let pivot = Reflect.get(this.cannon, "barrelPivot");
             pivot.translation = ƒ.Vector3.Z(0.0);
+            // this.getComponent(ƒ.ComponentAudio).play(true);
         }
         createCannon() {
             let cannon = new ƒAid.Node("Cannon", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(5)));
@@ -171,8 +181,12 @@ var UfoundLost;
     class Helicopter extends UfoundLost.GameObject {
         constructor(_name, _position) {
             super(_name, _position, Helicopter.material, ƒ.Vector2.ONE(0.5));
+            let cmpAudio = new ƒ.ComponentAudio(Helicopter.audio, true, true);
+            cmpAudio.volume = 0.05;
+            this.addComponent(cmpAudio);
         }
     }
+    Helicopter.audio = new ƒ.Audio("Audio/Helicopter0.mp3");
     // private static material: ƒ.Material = new ƒ.Material("Helicopter", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("yellow", 0.5)));
     Helicopter.material = new ƒ.Material("Helicopter", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/Helicopter.png")));
     UfoundLost.Helicopter = Helicopter;
@@ -200,6 +214,12 @@ var UfoundLost;
         createArmada(10);
         flak = new UfoundLost.Flak();
         UfoundLost.graph.appendChild(flak);
+        let listener = new ƒ.ComponentAudioListener();
+        ƒ.AudioManager.default.listenTo(UfoundLost.graph);
+        ƒ.AudioManager.default.listenWith(listener);
+        UfoundLost.graph.addComponent(listener);
+        let cmpAudio = new ƒ.ComponentAudio(new ƒ.Audio("Audio/Atmo.mp3"), true, true);
+        UfoundLost.graph.addComponent(cmpAudio);
         setupInteraction();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
@@ -326,12 +346,14 @@ var UfoundLost;
             this.job = JOB.ROAM;
             this.maxVelocity = 5;
             this.findTargetPosition();
+            this.addComponent(new ƒ.ComponentAudio());
         }
         update(_timeslice) {
             super.update(_timeslice);
             let position = this.mtxLocal.translation;
             let atTarget = this.mtxLocal.translation.isInsideSphere(this.posTarget, 2 * _timeslice * this.maxVelocity);
             let jobPrevious = this.job;
+            let cmpAudio = this.getComponent(ƒ.ComponentAudio);
             switch (this.job) {
                 case JOB.ROAM:
                     if (!atTarget)
@@ -347,10 +369,16 @@ var UfoundLost;
                         this.maxVelocity = 1;
                         this.setTargetPosition(new ƒ.Vector3(position.x, UfoundLost.ufoSpaceDefinition.min.y, position.z));
                         this.job = JOB.PREPARE;
+                        cmpAudio.setAudio(Ufo.audioPrepare);
+                        cmpAudio.volume = 0.1;
+                        cmpAudio.play(true);
                         break;
                     }
                     this.findTargetPosition();
                     this.job = JOB.ROAM;
+                    cmpAudio.volume = 1;
+                    cmpAudio.setAudio(ƒ.Random.default.getElement(Ufo.audioMoves));
+                    cmpAudio.play(true);
                     break;
                 case JOB.PREPARE:
                     if (!atTarget)
@@ -359,6 +387,9 @@ var UfoundLost;
                     this.velocity = ƒ.Vector3.ZERO();
                     this.tractor.getComponent(ƒ.ComponentMesh).activate(true);
                     this.timeForNextJob = ƒ.Time.game.get() + 1000 * ƒ.Random.default.getRange(10, 15);
+                    cmpAudio.volume = 0.5;
+                    cmpAudio.setAudio(Ufo.audioTractor);
+                    cmpAudio.play(true);
                     break;
                 case JOB.TRACTOR:
                     if (ƒ.Time.game.get() < this.timeForNextJob)
@@ -369,8 +400,8 @@ var UfoundLost;
                     this.job = JOB.ROAM;
                     break;
             }
-            if (jobPrevious != this.job)
-                ƒ.Debug.fudge(JOB[this.job]);
+            // if (jobPrevious != this.job)
+            //   ƒ.Debug.fudge(JOB[this.job]);
         }
         createTractorBeam() {
             this.tractor = new UfoundLost.GameObject("TractorBeam", ƒ.Vector3.ZERO(), Ufo.mtrTractor);
@@ -393,6 +424,11 @@ var UfoundLost;
             this.setTargetPosition(ƒ.Random.default.getVector3(UfoundLost.ufoSpaceDefinition.min, UfoundLost.ufoSpaceDefinition.max));
         }
     }
+    Ufo.audioMoves = [
+        new ƒ.Audio("Audio/UfoMove0.mp3"), new ƒ.Audio("Audio/UfoMove1.mp3"), new ƒ.Audio("Audio/UfoMove2.mp3")
+    ];
+    Ufo.audioPrepare = new ƒ.Audio("Audio/Ufo0.mp3");
+    Ufo.audioTractor = new ƒ.Audio("Audio/Beam0.mp3");
     // private static material: ƒ.Material = new ƒ.Material("Ufo", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("black", 0.5)));
     // private static mtrTractor: ƒ.Material = new ƒ.Material("Ufo", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("pink", 0.5)));
     Ufo.material = new ƒ.Material("Ufo", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/Ufo.png")));

@@ -29,6 +29,15 @@ namespace UfoundLost {
     flak = new Flak();
     graph.appendChild(flak);
 
+    let listener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
+    ƒ.AudioManager.default.listenTo(graph);
+    ƒ.AudioManager.default.listenWith(listener);
+    graph.addComponent(listener);
+
+    let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(new ƒ.Audio("Audio/Atmo.mp3"), true, true);
+    graph.addComponent(cmpAudio);
+
+
     setupInteraction();
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);

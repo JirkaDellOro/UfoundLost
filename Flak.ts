@@ -7,6 +7,8 @@ namespace UfoundLost {
     private detonations: ƒ.Node;
     private cannon: ƒ.Node;
 
+    // private static audioShot: ƒ.Audio = new ƒ.Audio("Audio/Shot.mp3");
+
     public constructor() {
       super("FlakGraph");
       let mtrCrosshair: ƒ.Material = new ƒ.Material("Crosshair", ƒ.ShaderTexture,
@@ -16,13 +18,16 @@ namespace UfoundLost {
       this.crosshair.maxVelocity = 3;
       this.appendChild(this.crosshair);
 
-      this.crosshairTarget = new GameObject("CrosshairTarget", ƒ.Vector3.Y(ufoSpaceDefinition.height - 2), mtrCrosshair, ƒ.Vector2.ONE(0.3));
+      this.crosshairTarget = new GameObject("CrosshairTarget", ƒ.Vector3.Y(ufoSpaceDefinition.height), mtrCrosshair, ƒ.Vector2.ONE(0.3));
       this.appendChild(this.crosshairTarget);
 
       this.detonations = new ƒ.Node("Detonations");
       this.appendChild(this.detonations);
       this.cannon = this.createCannon();
       this.appendChild(this.cannon);
+
+      this.input(0.01, 0, 0);
+      // this.addComponent(new ƒ.ComponentAudio(Flak.audioShot));
     }
 
     public update(_timeslice: number): void {
@@ -45,6 +50,7 @@ namespace UfoundLost {
       let move: ƒ.Vector3 = new ƒ.Vector3(_x, _y, _z);
       this.crosshairTarget.mtxLocal.translate(move);
       this.crosshairTarget.restrictPosition(ufoSpaceDefinition.min, ufoSpaceDefinition.max);
+      this.crosshair.restrictPosition(ufoSpaceDefinition.min, ufoSpaceDefinition.max);
     }
 
     public shoot(): void {
@@ -54,6 +60,8 @@ namespace UfoundLost {
 
       let pivot: ƒ.Matrix4x4 = Reflect.get(this.cannon, "barrelPivot");
       pivot.translation = ƒ.Vector3.Z(0.0);
+
+      // this.getComponent(ƒ.ComponentAudio).play(true);
     }
 
     private createCannon(): ƒ.Node {
@@ -72,7 +80,7 @@ namespace UfoundLost {
       cannon.appendChild(new ƒAid.Node("Pod2", ƒ.Matrix4x4.SCALING(new ƒ.Vector3(0.02, 0.02, 0.2)), mtrCannon, meshCannon));
       let bearing: ƒ.Node = new ƒAid.Node("Bearing", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0.2)), mtrCannon,
         new ƒ.MeshSphere("Bearing", 6, 6)
-      ); 
+      );
       bearing.getComponent(ƒ.ComponentMesh).pivot.scale(new ƒ.Vector3(0.1, 0.1, 0.3));
       cannon.appendChild(bearing)
       bearing.appendChild(barrel);
