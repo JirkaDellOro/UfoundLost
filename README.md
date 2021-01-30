@@ -50,4 +50,7 @@ A simple Ufo-AI...
 ### 20.00 (8pm)
 Integrated Ellie's pixel art!!   
 ![](Docu/Graphics.gif)  
-[Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/5882b9af0bba3465706ea5a4bf4762b56503bd39)
+[Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/5882b9af0bba3465706ea5a4bf4762b56503bd39)  
+
+### 24.00 (0am)
+Sounds edited and integrated! Time to sleep...
