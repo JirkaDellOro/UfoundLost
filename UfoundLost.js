@@ -57,13 +57,11 @@ var UfoundLost;
 (function (UfoundLost) {
     var ƒ = FudgeCore;
     class GameObject extends ƒ.Node {
-        // public mtxPivotInverse: ƒ.Matrix4x4 | null = null;
-        // public mtxComplete: ƒ.Matrix4x4;
-        // public mtxCompleteInverse: ƒ.Matrix4x4;
         constructor(_name, _position, _material, _size, _rotation) {
             super(_name);
             this.velocity = ƒ.Vector3.ZERO();
             this.maxVelocity = 1;
+            this.posTarget = ƒ.Vector3.ZERO();
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(_position)));
             let cmpMesh = new ƒ.ComponentMesh(GameObject.meshSprite);
             this.addComponent(cmpMesh);
@@ -74,7 +72,6 @@ var UfoundLost;
                 this.mtxLocal.rotation = _rotation;
             if (_size)
                 cmpMesh.pivot.scale(_size.toVector3(1));
-            this.mtxPivot = this.getComponent(ƒ.ComponentMesh).pivot;
         }
         update(_timeslice) {
             let position = this.mtxLocal.translation;
@@ -84,6 +81,7 @@ var UfoundLost;
         setTargetPosition(_position) {
             this.velocity = ƒ.Vector3.DIFFERENCE(_position, this.mtxLocal.translation);
             this.velocity.normalize(this.maxVelocity);
+            this.posTarget = _position;
         }
         restrictPosition(_min, _max) {
             let position = this.mtxLocal.translation;
@@ -151,19 +149,24 @@ var UfoundLost;
     const cntHeliPack = { x: new ƒ.Control("HeliPackX", 0.1), z: new ƒ.Control("HeliPackZ", 0.1), delay: 500 };
     let flak;
     let heliPack;
+    let ufos;
     function start(_event) {
         ƒ.Debug.fudge("UfoundLost starts");
         createViewport();
         createScene();
+        createArmada(10);
         setupInteraction();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
     }
     function update(_event) {
-        ƒ.Debug.fudge("udpate");
+        // ƒ.Debug.fudge("udpate");
         let timeslice = ƒ.Loop.timeFrameGame / 1000;
         flak.update(timeslice);
         controlHeliPack(timeslice);
+        for (let ufo of ufos.getChildren()) {
+            ufo.update(timeslice);
+        }
         UfoundLost.viewport.draw();
     }
     function setupInteraction() {
@@ -201,6 +204,14 @@ var UfoundLost;
         cmpCamera.backgroundColor = ƒ.Color.CSS("black");
         UfoundLost.viewport.initialize("Viewport", UfoundLost.graph, cmpCamera, canvas);
     }
+    function createArmada(_nUfos) {
+        ufos = new ƒ.Node("Ufos");
+        UfoundLost.graph.appendChild(ufos);
+        for (let i = 0; i < _nUfos; i++) {
+            let ufo = new UfoundLost.Ufo();
+            ufos.appendChild(ufo);
+        }
+    }
     function createScene() {
         let origin = new ƒAid.NodeCoordinateSystem("Origin");
         UfoundLost.graph.appendChild(origin);
@@ -232,6 +243,7 @@ var UfoundLost;
         let cmpMeshUfoSpace = ufoSpace.getComponent(ƒ.ComponentMesh);
         cmpMeshUfoSpace.pivot.scale(UfoundLost.ufoSpaceDefinition.size);
         ufoSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("red", 0.5);
+        cmpMeshUfoSpace.activate(false);
         UfoundLost.graph.appendChild(ufoSpace);
         let heliSpace = new ƒAid.Node("HeliSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, UfoundLost.heliSpaceDefinition.height, 0)), mtrWhite, meshCube);
         let cmpMeshHeliSpace = heliSpace.getComponent(ƒ.ComponentMesh);
@@ -248,4 +260,89 @@ var UfoundLost;
         UfoundLost.heliPackDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliPack.mtxWorld);
         UfoundLost.heliPackDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliPack.mtxWorld);
     }
+})(UfoundLost || (UfoundLost = {}));
+var UfoundLost;
+(function (UfoundLost) {
+    // import ƒAid = FudgeAid;
+    let JOB;
+    (function (JOB) {
+        JOB[JOB["ROAM"] = 0] = "ROAM";
+        JOB[JOB["LURK"] = 1] = "LURK";
+        JOB[JOB["PREPARE"] = 2] = "PREPARE";
+        JOB[JOB["TRACTOR"] = 3] = "TRACTOR";
+        JOB[JOB["EVADE"] = 4] = "EVADE";
+        JOB[JOB["EXPLODE"] = 5] = "EXPLODE";
+    })(JOB || (JOB = {}));
+    class Ufo extends UfoundLost.GameObject {
+        constructor() {
+            super("Ufo", Ufo.getStartPosition(), Ufo.material);
+            this.timeForNextJob = 0;
+            this.tractor = new UfoundLost.GameObject("TractorBeam", ƒ.Vector3.ZERO(), Ufo.mtrTractor);
+            let meshTractor = this.tractor.getComponent(ƒ.ComponentMesh);
+            meshTractor.pivot.translateY(-0.5);
+            this.tractor.mtxLocal.translateY(-0.5);
+            this.tractor.mtxLocal.scaleX(0.2);
+            this.tractor.mtxLocal.scaleY(UfoundLost.ufoSpaceDefinition.min.y - 0.5);
+            meshTractor.activate(false);
+            this.appendChild(this.tractor);
+            this.job = JOB.ROAM;
+            this.maxVelocity = 5;
+            this.findTargetPosition();
+        }
+        update(_timeslice) {
+            super.update(_timeslice);
+            let position = this.mtxLocal.translation;
+            let atTarget = this.mtxLocal.translation.isInsideSphere(this.posTarget, 2 * _timeslice * this.maxVelocity);
+            let jobPrevious = this.job;
+            switch (this.job) {
+                case JOB.ROAM:
+                    this.maxVelocity = 5;
+                    if (!atTarget)
+                        break; // keep roamin
+                    this.job = JOB.LURK;
+                    this.velocity = ƒ.Vector3.ZERO();
+                    this.timeForNextJob = ƒ.Time.game.get() + 1000 * ƒ.Random.default.getRange(1, 3);
+                    break;
+                case JOB.LURK:
+                    if (ƒ.Time.game.get() < this.timeForNextJob)
+                        break; // keep lurking
+                    if (Math.random() < 0.2) {
+                        this.maxVelocity = 1;
+                        this.setTargetPosition(new ƒ.Vector3(position.x, UfoundLost.ufoSpaceDefinition.min.y, position.z));
+                        this.job = JOB.PREPARE;
+                        break;
+                    }
+                    this.findTargetPosition();
+                    this.job = JOB.ROAM;
+                    break;
+                case JOB.PREPARE:
+                    if (!atTarget)
+                        break; // keep preparing
+                    this.job = JOB.TRACTOR;
+                    this.velocity = ƒ.Vector3.ZERO();
+                    this.tractor.getComponent(ƒ.ComponentMesh).activate(true);
+                    this.timeForNextJob = ƒ.Time.game.get() + 1000 * ƒ.Random.default.getRange(3, 4);
+                    break;
+                case JOB.TRACTOR:
+                    if (ƒ.Time.game.get() < this.timeForNextJob)
+                        break; // keep sucking
+                    this.tractor.getComponent(ƒ.ComponentMesh).activate(false);
+                    this.findTargetPosition();
+                    this.job = JOB.ROAM;
+                    break;
+            }
+            if (jobPrevious != this.job)
+                ƒ.Debug.fudge(JOB[this.job]);
+        }
+        static getStartPosition() {
+            let position = ƒ.Random.default.getVector3(UfoundLost.ufoSpaceDefinition.min, UfoundLost.ufoSpaceDefinition.max);
+            return position;
+        }
+        findTargetPosition() {
+            this.setTargetPosition(ƒ.Random.default.getVector3(UfoundLost.ufoSpaceDefinition.min, UfoundLost.ufoSpaceDefinition.max));
+        }
+    }
+    Ufo.material = new ƒ.Material("Ufo", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("black", 0.5)));
+    Ufo.mtrTractor = new ƒ.Material("Ufo", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("pink", 0.5)));
+    UfoundLost.Ufo = Ufo;
 })(UfoundLost || (UfoundLost = {}));

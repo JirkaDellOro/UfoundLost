@@ -3008,6 +3008,14 @@ declare namespace FudgeCore {
          * Returns a randomly selected symbol from the given object, if symbols are used as keys
          */
         getPropertySymbol(_object: Object): symbol;
+        /**
+         * Returns a random three-dimensional vector in the limits of the box defined by the vectors given as [_corner0, _corner1[
+         */
+        getVector3(_corner0: Vector3, _corner1: Vector3): Vector3;
+        /**
+         * Returns a random two-dimensional vector in the limits of the rectangle defined by the vectors given as [_corner0, _corner1[
+         */
+        getVector2(_corner0: Vector2, _corner1: Vector2): Vector2;
     }
     /**
      * Standard [[Random]]-instance using Math.random().

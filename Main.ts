@@ -17,12 +17,14 @@ namespace UfoundLost {
 
   let flak: Flak;
   let heliPack: HeliPack;
+  let ufos: ƒ.Node;
 
   function start(_event: Event): void {
     ƒ.Debug.fudge("UfoundLost starts");
 
     createViewport();
     createScene();
+    createArmada(10);
 
     setupInteraction();
 
@@ -31,11 +33,15 @@ namespace UfoundLost {
   }
 
   function update(_event: Event): void {
-    ƒ.Debug.fudge("udpate");
+    // ƒ.Debug.fudge("udpate");
     let timeslice = ƒ.Loop.timeFrameGame / 1000;
 
     flak.update(timeslice);
     controlHeliPack(timeslice);
+
+    for (let ufo of ufos.getChildren() as Ufo[]) {
+      ufo.update(timeslice);
+    }
 
     viewport.draw();
   }
@@ -88,6 +94,15 @@ namespace UfoundLost {
 
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
   }
+ 
+  function createArmada(_nUfos: number): void {
+    ufos = new ƒ.Node("Ufos");
+    graph.appendChild(ufos);
+    for (let i:number = 0; i<_nUfos; i++) {
+      let ufo: Ufo = new Ufo();
+      ufos.appendChild(ufo);
+    }
+  }
 
   function createScene(): void {
     let origin: ƒAid.NodeCoordinateSystem = new ƒAid.NodeCoordinateSystem("Origin");
@@ -127,6 +142,7 @@ namespace UfoundLost {
     let cmpMeshUfoSpace: ƒ.ComponentMesh = ufoSpace.getComponent(ƒ.ComponentMesh);
     cmpMeshUfoSpace.pivot.scale(ufoSpaceDefinition.size);
     ufoSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("red", 0.5);
+    cmpMeshUfoSpace.activate(false)
     graph.appendChild(ufoSpace);
 
     let heliSpace: ƒ.Node = new ƒAid.Node("HeliSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, heliSpaceDefinition.height, 0)), mtrWhite, meshCube);

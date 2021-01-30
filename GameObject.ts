@@ -3,12 +3,9 @@ namespace UfoundLost {
 
   export class GameObject extends ƒ.Node {
     private static readonly meshSprite: ƒ.MeshSprite = new ƒ.MeshSprite();
-    public mtxPivot: ƒ.Matrix4x4;
     public velocity: ƒ.Vector3 = ƒ.Vector3.ZERO();
     public maxVelocity: number = 1;
-    // public mtxPivotInverse: ƒ.Matrix4x4 | null = null;
-    // public mtxComplete: ƒ.Matrix4x4;
-    // public mtxCompleteInverse: ƒ.Matrix4x4;
+    protected posTarget: ƒ.Vector3 = ƒ.Vector3.ZERO();
 
     public constructor(_name: string, _position: ƒ.Vector3, _material: ƒ.Material, _size?: ƒ.Vector2, _rotation?: ƒ.Vector3) {
       super(_name);
@@ -24,8 +21,6 @@ namespace UfoundLost {
 
       if (_size)
         cmpMesh.pivot.scale(_size.toVector3(1));
-
-      this.mtxPivot = this.getComponent(ƒ.ComponentMesh).pivot;
     }
 
     public update(_timeslice: number): void {
@@ -37,6 +32,7 @@ namespace UfoundLost {
     public setTargetPosition(_position: ƒ.Vector3): void {
       this.velocity = ƒ.Vector3.DIFFERENCE(_position, this.mtxLocal.translation);
       this.velocity.normalize(this.maxVelocity);
+      this.posTarget = _position;
     }
 
     public restrictPosition(_min: ƒ.Vector3, _max: ƒ.Vector3): void {
