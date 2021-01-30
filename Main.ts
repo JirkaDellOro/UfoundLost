@@ -5,14 +5,13 @@ namespace UfoundLost {
   window.addEventListener("load", start);
 
 
+  const yCamera: number = 4;
   export const viewport: ƒ.Viewport = new ƒ.Viewport();
   export const graph: ƒ.Node = new ƒ.Node("MainGraph");
-  const yCamera: number = 4;
-  const ufoSpaceDefinition = { height: 7, size: new ƒ.Vector3(16, 2, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
-  const heliSpaceDefinition = { height: 2, size: new ƒ.Vector3(16, 0.5, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+  export const ufoSpaceDefinition = { height: 7, size: new ƒ.Vector3(16, 2, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+  export const heliSpaceDefinition = { height: 2, size: new ƒ.Vector3(16, 0.5, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
 
-  let crosshair: GameObject;
-  let crosshairTarget: GameObject;
+  let flak: Flak;
 
   const cntFlak = {
     x: new ƒ.Control("FlakX", 0.05),
@@ -24,7 +23,6 @@ namespace UfoundLost {
     ƒ.Debug.fudge("UfoundLost starts");
 
     createViewport();
-    createFlak();
     createScene();
 
     setupInteraction();
@@ -37,8 +35,7 @@ namespace UfoundLost {
     ƒ.Debug.fudge("udpate");
     let timeslice = ƒ.Loop.timeFrameGame / 1000;
 
-    crosshair.setTargetPosition(crosshairTarget.mtxLocal.translation);
-    crosshair.update(timeslice);
+    flak.update(timeslice);
 
     viewport.draw();
   }
@@ -51,7 +48,7 @@ namespace UfoundLost {
     canvas.addEventListener("mousemove", hndMouse);
     canvas.addEventListener("wheel", hndMouse);
     canvas.addEventListener("click", canvas.requestPointerLock);
-    canvas.addEventListener("click", shoot);
+    canvas.addEventListener("pointerdown", (_event: MouseEvent) => flak.shoot());
   }
 
   function hndMouse(_event: MouseEvent | WheelEvent): void {
@@ -60,13 +57,7 @@ namespace UfoundLost {
     if (_event.type == "wheel")
       cntFlak.y.setInput((<WheelEvent>_event).deltaY);
 
-    let move: ƒ.Vector3 = new ƒ.Vector3(cntFlak.x.getOutput(), cntFlak.y.getOutput(), cntFlak.z.getOutput());
-    crosshairTarget.mtxLocal.translate(move);
-    crosshairTarget.restrictPosition(ufoSpaceDefinition.min, ufoSpaceDefinition.max);
-  }
-
-  function shoot(_event: MouseEvent): void {
-
+    flak.input(cntFlak.x.getOutput(), cntFlak.y.getOutput(), cntFlak.z.getOutput());
   }
 
   function createViewport(): void {
@@ -82,19 +73,13 @@ namespace UfoundLost {
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
   }
 
-  function createFlak(): void {
-    let mtrCrosshair: ƒ.Material = new ƒ.Material("Crosshair", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("White")));
-    crosshair = new GameObject("Crosshair", ƒ.Vector3.Y(ufoSpaceDefinition.height), mtrCrosshair);
-    graph.appendChild(crosshair);
-
-    crosshairTarget = new GameObject("CrosshairTarget", ƒ.Vector3.Y(ufoSpaceDefinition.height - 2), mtrCrosshair, new ƒ.Vector2(0.5, 0.5));
-    graph.appendChild(crosshairTarget);
-  }
-
   function createScene(): void {
     let origin: ƒAid.NodeCoordinateSystem = new ƒAid.NodeCoordinateSystem("Origin");
     graph.appendChild(origin);
 
+    flak = new Flak();
+    graph.appendChild(flak);
+    
     let meshQuad: ƒ.MeshQuad = new ƒ.MeshQuad();
     let mtrWhite: ƒ.Material = new ƒ.Material("Background", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
 
