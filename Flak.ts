@@ -21,6 +21,11 @@ namespace UfoundLost {
     public update(_timeslice: number): void {
       this.crosshair.setTargetPosition(this.crosshairTarget.mtxLocal.translation);
       this.crosshair.update(_timeslice);
+
+      for (let detonation of this.detonations.getChildren() as Detonation[]) {
+        if (detonation.update(_timeslice))
+          this.detonations.removeChild(detonation);
+      }
     }
 
     public input(_x: number, _y: number, _z: number): void {
@@ -32,7 +37,7 @@ namespace UfoundLost {
     public shoot(): void {
       ƒ.Debug.fudge("shoot");
       let detonation: Detonation = new Detonation(this.crosshair.mtxLocal.translation);
-      this.appendChild(detonation);
+      this.detonations.appendChild(detonation);
     }
   }
 }

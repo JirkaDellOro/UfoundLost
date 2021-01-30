@@ -5,11 +5,17 @@ var UfoundLost;
     class Detonation extends ƒAid.Node {
         constructor(_position) {
             super("Detonation", ƒ.Matrix4x4.TRANSLATION(_position), Detonation.material, Detonation.mesh);
-            this.radius = 2;
+            this.getComponent(ƒ.ComponentMesh).pivot.scaling = ƒ.Vector3.ONE(Detonation.radius);
+        }
+        update(_timeslice) {
+            let cmpMaterial = this.getComponent(ƒ.ComponentMaterial);
+            cmpMaterial.clrPrimary.a -= _timeslice;
+            return (cmpMaterial.clrPrimary.a < 0);
         }
     }
     Detonation.mesh = new ƒ.MeshSphere("Detonation", 10, 10);
-    Detonation.material = new ƒ.Material("Detonation", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray")));
+    Detonation.material = new ƒ.Material("Detonation", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("gray")));
+    Detonation.radius = 2;
     UfoundLost.Detonation = Detonation;
 })(UfoundLost || (UfoundLost = {}));
 var UfoundLost;
@@ -29,6 +35,10 @@ var UfoundLost;
         update(_timeslice) {
             this.crosshair.setTargetPosition(this.crosshairTarget.mtxLocal.translation);
             this.crosshair.update(_timeslice);
+            for (let detonation of this.detonations.getChildren()) {
+                if (detonation.update(_timeslice))
+                    this.detonations.removeChild(detonation);
+            }
         }
         input(_x, _y, _z) {
             let move = new ƒ.Vector3(_x, _y, _z);
@@ -38,7 +48,7 @@ var UfoundLost;
         shoot() {
             ƒ.Debug.fudge("shoot");
             let detonation = new UfoundLost.Detonation(this.crosshair.mtxLocal.translation);
-            this.appendChild(detonation);
+            this.detonations.appendChild(detonation);
         }
     }
     UfoundLost.Flak = Flak;
