@@ -61,7 +61,7 @@ var UfoundLost;
     let crosshairTarget;
     const cntFlak = {
         x: new ƒ.Control("FlakX", 0.05),
-        z: new ƒ.Control("FlakZ", 0.05),
+        z: new ƒ.Control("FlakZ", 0.03),
         y: new ƒ.Control("FlakY", -0.001)
     };
     function start(_event) {

@@ -16,7 +16,7 @@ namespace UfoundLost {
 
   const cntFlak = {
     x: new ƒ.Control("FlakX", 0.05),
-    z: new ƒ.Control("FlakZ", 0.05),
+    z: new ƒ.Control("FlakZ", 0.03),
     y: new ƒ.Control("FlakY", -0.001)
   };
 
@@ -66,7 +66,7 @@ namespace UfoundLost {
   }
 
   function shoot(_event: MouseEvent): void {
-    
+
   }
 
   function createViewport(): void {
