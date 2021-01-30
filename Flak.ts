@@ -6,12 +6,14 @@ namespace UfoundLost {
 
     public constructor() {
       super("FlakGraph");
-      let mtrCrosshair: ƒ.Material = new ƒ.Material("Crosshair", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("White")));
-      this.crosshair = new GameObject("Crosshair", ƒ.Vector3.Y(ufoSpaceDefinition.height), mtrCrosshair);
+      let mtrCrosshair: ƒ.Material = new ƒ.Material("Crosshair", ƒ.ShaderTexture,
+        new ƒ.CoatTextured(ƒ.Color.CSS("White"), new ƒ.TextureImage("Images/Crosshair.png"))
+      );
+      this.crosshair = new GameObject("Crosshair", ƒ.Vector3.Y(ufoSpaceDefinition.height), mtrCrosshair, ƒ.Vector2.ONE(0.5));
       this.crosshair.maxVelocity = 3;
       this.appendChild(this.crosshair);
 
-      this.crosshairTarget = new GameObject("CrosshairTarget", ƒ.Vector3.Y(ufoSpaceDefinition.height - 2), mtrCrosshair, new ƒ.Vector2(0.5, 0.5));
+      this.crosshairTarget = new GameObject("CrosshairTarget", ƒ.Vector3.Y(ufoSpaceDefinition.height - 2), mtrCrosshair, ƒ.Vector2.ONE(0.3));
       this.appendChild(this.crosshairTarget);
 
       this.detonations = new ƒ.Node("Detonations");

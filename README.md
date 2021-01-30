@@ -47,3 +47,7 @@ A simple Ufo-AI...
 ![](Docu/UfoAI.gif)  
 [Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/068f5789cdff7bcbd6b0561bce198838f22c05b5)
 
+### 22.00 (8pm)
+Integrated Ellie's pixel art!!   
+![](Docu/Graphics.gif)  
+[Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/068f5789cdff7bcbd6b0561bce198838f22c05b5)

@@ -9,7 +9,7 @@ namespace UfoundLost {
   export const viewport: ƒ.Viewport = new ƒ.Viewport();
   export const graph: ƒ.Node = new ƒ.Node("MainGraph");
   export const ufoSpaceDefinition = { height: 7, size: new ƒ.Vector3(16, 2, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
-  export const heliSpaceDefinition = { height: 2, size: new ƒ.Vector3(16, 0.5, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+  export const heliSpaceDefinition = { height: 1, size: new ƒ.Vector3(16, 0.5, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
   export const heliPackDefinition = { height: heliSpaceDefinition.height, size: new ƒ.Vector3(2, 0.5, 2), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
 
   const cntFlak = { x: new ƒ.Control("FlakX", 0.05), z: new ƒ.Control("FlakZ", 0.03), y: new ƒ.Control("FlakY", -0.001) };
@@ -25,6 +25,9 @@ namespace UfoundLost {
     createViewport();
     createScene();
     createArmada(10);
+
+    flak = new Flak();
+    graph.appendChild(flak);
 
     setupInteraction();
 
@@ -94,11 +97,11 @@ namespace UfoundLost {
 
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
   }
- 
+
   function createArmada(_nUfos: number): void {
     ufos = new ƒ.Node("Ufos");
     graph.appendChild(ufos);
-    for (let i:number = 0; i<_nUfos; i++) {
+    for (let i: number = 0; i < _nUfos; i++) {
       let ufo: Ufo = new Ufo();
       ufos.appendChild(ufo);
     }
@@ -106,35 +109,36 @@ namespace UfoundLost {
 
   function createScene(): void {
     let origin: ƒAid.NodeCoordinateSystem = new ƒAid.NodeCoordinateSystem("Origin");
-    graph.appendChild(origin);
+    // graph.appendChild(origin);
 
-    flak = new Flak();
-    graph.appendChild(flak);
-
-    heliPack = new HeliPack(ƒ.Vector3.Y(heliPackDefinition.height), heliPackDefinition.size);
-    graph.appendChild(heliPack);
 
     let meshQuad: ƒ.MeshQuad = new ƒ.MeshQuad();
     let mtrWhite: ƒ.Material = new ƒ.Material("Background", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
 
-    let background: ƒ.Node = new ƒAid.Node("Background", ƒ.Matrix4x4.IDENTITY(), mtrWhite, meshQuad);
+    let mtrBackground: ƒ.Material = new ƒ.Material("Background", ƒ.ShaderTexture,
+      new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/Background.png"))
+    );
+    let background: ƒ.Node = new ƒAid.Node("Background", ƒ.Matrix4x4.IDENTITY(), mtrBackground, meshQuad);
     background.mtxLocal.translate(new ƒ.Vector3(0, yCamera, -6));
     background.mtxLocal.scale(new ƒ.Vector3(16, 9, 1));
     background.mtxLocal.scale(ƒ.Vector3.ONE(1.7));
-    background.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("darkblue");
+    // background.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("darkblue");
     // background.mtxLocal.lookAt(viewport.camera.pivot.translation);
     graph.appendChild(background);
 
-    for (let x: number = -8; x <= 8; x++) {
-      for (let z: number = -4; z <= 4; z++) {
-        let floor: ƒ.Node = new ƒAid.Node("Floor", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(x, 0, z)), mtrWhite, meshQuad);
-        let cmpMesh: ƒ.ComponentMesh = floor.getComponent(ƒ.ComponentMesh);
-        cmpMesh.pivot.rotateX(-90);
-        cmpMesh.pivot.scale(ƒ.Vector3.ONE(0.9));
-        floor.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("darkgreen");
-        graph.appendChild(floor);
-      }
-    }
+    // for (let x: number = -8; x <= 8; x++) {
+    //   for (let z: number = -4; z <= 4; z++) {
+    //     let floor: ƒ.Node = new ƒAid.Node("Floor", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(x, 0, z)), mtrWhite, meshQuad);
+    //     let cmpMesh: ƒ.ComponentMesh = floor.getComponent(ƒ.ComponentMesh);
+    //     cmpMesh.pivot.rotateX(-90);
+    //     cmpMesh.pivot.scale(ƒ.Vector3.ONE(0.9));
+    //     floor.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("darkgreen");
+    //     graph.appendChild(floor);
+    //   }
+    // }
+
+    heliPack = new HeliPack(ƒ.Vector3.Y(heliPackDefinition.height), heliPackDefinition.size);
+    graph.appendChild(heliPack);
 
     let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
 

@@ -31,7 +31,8 @@ namespace UfoundLost {
 
     public setTargetPosition(_position: ƒ.Vector3): void {
       this.velocity = ƒ.Vector3.DIFFERENCE(_position, this.mtxLocal.translation);
-      this.velocity.normalize(this.maxVelocity);
+      if (this.velocity.magnitude > this.maxVelocity * 0.01)
+        this.velocity.normalize(this.maxVelocity);
       this.posTarget = _position;
     }
 
