@@ -33,10 +33,17 @@ Started at 7.00 (7am)
 [Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/94f596fed257a97009c3de4488d8909333c6d50a)
 
 ### 15.00 (3pm)
-Ellie has sent some more sprites and a new background
+Ellie has sent some more sprites and a new background  
 ![](Docu/Background2.png)
 
-The controls are pretty much done, so far solely with placeholders. The mouse controls a target point the crosshair slowly moves towards. On mouseclick, a flak projectile detonates at the crosshair position. The pack of helicopters is controlled by the keyboard. Starting and landing in the middle of the town is not implemented yet. 
+The controls are pretty much done, so far solely with placeholders. The mouse controls a target point the crosshair slowly moves towards. On mouseclick, a flak projectile detonates at the crosshair position. The pack of helicopters is controlled by the keyboard. Starting and landing in the middle of the town is not implemented yet.  
 ![](Docu/Controls.gif)  
 
 [Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/cc46f98537252cf08e12f2bf65d5400810d82ecb)
+
+
+### 17.00 (5pm)
+A simple Ufo-AI...    
+![](Docu/UfoAI.gif)  
+[Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/068f5789cdff7bcbd6b0561bce198838f22c05b5)
+
