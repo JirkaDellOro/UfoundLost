@@ -11,8 +11,19 @@ That's what the plot became: Aliens invade a small suburb and try to suck up peo
 In the evening, Elli and Monika already created some sprites and a first draft of the scenery  
 ![](Docu/UFO32x32.png) ![](Docu/Heli.png) ![](Docu/Background1.png)
 
-## Day3
+## Day 3
 A small design document was created to nail down some core functionality and behaviours.
 [Docu/Design.pdf](Docu/Design.pdf)
 
 <embed src="Docu/Design.pdf" type="application/pdf">
+<object data="Docu/Design.pdf" type="application/pdf" width="100%" height="50%">
+    <embed src="Docu/Design.pdf">
+    </embed>
+</object>
+
+## Day 4
+Downloaded some audio from https://freesound.org/  
+
+Programming started! Here is the first generated scene displaying the space the objects are supposed to move in.
+
+![](Docu/Spaces.png)
