@@ -10,14 +10,13 @@ namespace UfoundLost {
   export const graph: ƒ.Node = new ƒ.Node("MainGraph");
   export const ufoSpaceDefinition = { height: 7, size: new ƒ.Vector3(16, 2, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
   export const heliSpaceDefinition = { height: 2, size: new ƒ.Vector3(16, 0.5, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+  export const heliPackDefinition = { height: heliSpaceDefinition.height, size: new ƒ.Vector3(2, 0.5, 2), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+
+  const cntFlak = { x: new ƒ.Control("FlakX", 0.05), z: new ƒ.Control("FlakZ", 0.03), y: new ƒ.Control("FlakY", -0.001) };
+  const cntHeliPack = { x: new ƒ.Control("HeliPackX", 0.1), z: new ƒ.Control("HeliPackZ", 0.1), delay: 500 };
 
   let flak: Flak;
-
-  const cntFlak = {
-    x: new ƒ.Control("FlakX", 0.05),
-    z: new ƒ.Control("FlakZ", 0.03),
-    y: new ƒ.Control("FlakY", -0.001)
-  };
+  let heliPack: HeliPack;
 
   function start(_event: Event): void {
     ƒ.Debug.fudge("UfoundLost starts");
@@ -36,6 +35,7 @@ namespace UfoundLost {
     let timeslice = ƒ.Loop.timeFrameGame / 1000;
 
     flak.update(timeslice);
+    controlHeliPack(timeslice);
 
     viewport.draw();
   }
@@ -49,6 +49,22 @@ namespace UfoundLost {
     canvas.addEventListener("wheel", hndMouse);
     canvas.addEventListener("click", canvas.requestPointerLock);
     canvas.addEventListener("pointerdown", (_event: MouseEvent) => flak.shoot());
+
+    cntHeliPack.x.setDelay(cntHeliPack.delay);
+    cntHeliPack.z.setDelay(cntHeliPack.delay);
+  }
+
+  function controlHeliPack(_timeslice: number): void {
+    cntHeliPack.z.setInput(
+      ƒ.Keyboard.mapToValue(1, 0, [ƒ.KEYBOARD_CODE.S, ƒ.KEYBOARD_CODE.ARROW_DOWN])
+      + ƒ.Keyboard.mapToValue(-1, 0, [ƒ.KEYBOARD_CODE.W, ƒ.KEYBOARD_CODE.ARROW_UP])
+    );
+    cntHeliPack.x.setInput(
+      ƒ.Keyboard.mapToValue(-1, 0, [ƒ.KEYBOARD_CODE.A, ƒ.KEYBOARD_CODE.ARROW_LEFT])
+      + ƒ.Keyboard.mapToValue(1, 0, [ƒ.KEYBOARD_CODE.D, ƒ.KEYBOARD_CODE.ARROW_RIGHT])
+    );
+
+    heliPack.input(cntHeliPack.x.getOutput(), cntHeliPack.z.getOutput());
   }
 
   function hndMouse(_event: MouseEvent | WheelEvent): void {
@@ -79,14 +95,17 @@ namespace UfoundLost {
 
     flak = new Flak();
     graph.appendChild(flak);
-    
+
+    heliPack = new HeliPack(ƒ.Vector3.Y(heliPackDefinition.height), heliPackDefinition.size);
+    graph.appendChild(heliPack);
+
     let meshQuad: ƒ.MeshQuad = new ƒ.MeshQuad();
     let mtrWhite: ƒ.Material = new ƒ.Material("Background", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
 
     let background: ƒ.Node = new ƒAid.Node("Background", ƒ.Matrix4x4.IDENTITY(), mtrWhite, meshQuad);
-    background.mtxLocal.translate(new ƒ.Vector3(0, yCamera, -5));
+    background.mtxLocal.translate(new ƒ.Vector3(0, yCamera, -6));
     background.mtxLocal.scale(new ƒ.Vector3(16, 9, 1));
-    background.mtxLocal.scale(ƒ.Vector3.ONE(1.6));
+    background.mtxLocal.scale(ƒ.Vector3.ONE(1.7));
     background.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("darkblue");
     // background.mtxLocal.lookAt(viewport.camera.pivot.translation);
     graph.appendChild(background);
@@ -114,7 +133,9 @@ namespace UfoundLost {
     let cmpMeshHeliSpace: ƒ.ComponentMesh = heliSpace.getComponent(ƒ.ComponentMesh);
     cmpMeshHeliSpace.pivot.scale(heliSpaceDefinition.size);
     heliSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("grey", 0.5);
+    cmpMeshHeliSpace.activate(false)
     graph.appendChild(heliSpace);
+
 
     viewport.draw(); // to calculate world transforms
 
@@ -122,5 +143,9 @@ namespace UfoundLost {
     ufoSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshUfoSpace.mtxWorld);
     heliSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliSpace.mtxWorld);
     heliSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliSpace.mtxWorld);
+
+    let cmpMeshHeliPack: ƒ.ComponentMesh = heliPack.getChildrenByName("Catcher")[0].getComponent(ƒ.ComponentMesh);
+    heliPackDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliPack.mtxWorld);
+    heliPackDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliPack.mtxWorld);
   }
 }

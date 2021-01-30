@@ -103,6 +103,41 @@ var UfoundLost;
 })(UfoundLost || (UfoundLost = {}));
 var UfoundLost;
 (function (UfoundLost) {
+    var ƒAid = FudgeAid;
+    class HeliPack extends UfoundLost.GameObject {
+        constructor(_position, _size) {
+            super("HeliPack", _position, HeliPack.material);
+            this.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ZERO()); // remove the sprite for now, maybe useful later
+            let catcher = new ƒAid.Node("Catcher", ƒ.Matrix4x4.IDENTITY(), HeliPack.material, HeliPack.mesh);
+            catcher.getComponent(ƒ.ComponentMesh).pivot.scale(_size);
+            this.appendChild(catcher);
+            this.appendChild(new UfoundLost.Helicopter("Helicopter", new ƒ.Vector3(-_size.x / 2, 0.2, -_size.z / 2)));
+            this.appendChild(new UfoundLost.Helicopter("Helicopter", new ƒ.Vector3(_size.x / 2, 0.2, -_size.z / 2)));
+            this.appendChild(new UfoundLost.Helicopter("Helicopter", new ƒ.Vector3(-_size.x / 2, 0.2, _size.z / 2 + 0.1)));
+            this.appendChild(new UfoundLost.Helicopter("Helicopter", new ƒ.Vector3(_size.x / 2, 0.2, _size.z / 2 + 0.1)));
+        }
+        input(_x, _z) {
+            let move = new ƒ.Vector3(_x, 0, _z);
+            this.mtxLocal.translate(move);
+            this.restrictPosition(UfoundLost.heliSpaceDefinition.min, UfoundLost.heliSpaceDefinition.max);
+        }
+    }
+    HeliPack.mesh = new ƒ.MeshCube("HeliPack");
+    HeliPack.material = new ƒ.Material("Helipack", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("aqua", 0.5)));
+    UfoundLost.HeliPack = HeliPack;
+})(UfoundLost || (UfoundLost = {}));
+var UfoundLost;
+(function (UfoundLost) {
+    class Helicopter extends UfoundLost.GameObject {
+        constructor(_name, _position) {
+            super(_name, _position, Helicopter.material);
+        }
+    }
+    Helicopter.material = new ƒ.Material("Detonation", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("yellow", 0.5)));
+    UfoundLost.Helicopter = Helicopter;
+})(UfoundLost || (UfoundLost = {}));
+var UfoundLost;
+(function (UfoundLost) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
     window.addEventListener("load", start);
@@ -111,12 +146,11 @@ var UfoundLost;
     UfoundLost.graph = new ƒ.Node("MainGraph");
     UfoundLost.ufoSpaceDefinition = { height: 7, size: new ƒ.Vector3(16, 2, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
     UfoundLost.heliSpaceDefinition = { height: 2, size: new ƒ.Vector3(16, 0.5, 9), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+    UfoundLost.heliPackDefinition = { height: UfoundLost.heliSpaceDefinition.height, size: new ƒ.Vector3(2, 0.5, 2), min: new ƒ.Vector3(), max: new ƒ.Vector3() };
+    const cntFlak = { x: new ƒ.Control("FlakX", 0.05), z: new ƒ.Control("FlakZ", 0.03), y: new ƒ.Control("FlakY", -0.001) };
+    const cntHeliPack = { x: new ƒ.Control("HeliPackX", 0.1), z: new ƒ.Control("HeliPackZ", 0.1), delay: 500 };
     let flak;
-    const cntFlak = {
-        x: new ƒ.Control("FlakX", 0.05),
-        z: new ƒ.Control("FlakZ", 0.03),
-        y: new ƒ.Control("FlakY", -0.001)
-    };
+    let heliPack;
     function start(_event) {
         ƒ.Debug.fudge("UfoundLost starts");
         createViewport();
@@ -129,6 +163,7 @@ var UfoundLost;
         ƒ.Debug.fudge("udpate");
         let timeslice = ƒ.Loop.timeFrameGame / 1000;
         flak.update(timeslice);
+        controlHeliPack(timeslice);
         UfoundLost.viewport.draw();
     }
     function setupInteraction() {
@@ -139,6 +174,15 @@ var UfoundLost;
         canvas.addEventListener("wheel", hndMouse);
         canvas.addEventListener("click", canvas.requestPointerLock);
         canvas.addEventListener("pointerdown", (_event) => flak.shoot());
+        cntHeliPack.x.setDelay(cntHeliPack.delay);
+        cntHeliPack.z.setDelay(cntHeliPack.delay);
+    }
+    function controlHeliPack(_timeslice) {
+        cntHeliPack.z.setInput(ƒ.Keyboard.mapToValue(1, 0, [ƒ.KEYBOARD_CODE.S, ƒ.KEYBOARD_CODE.ARROW_DOWN])
+            + ƒ.Keyboard.mapToValue(-1, 0, [ƒ.KEYBOARD_CODE.W, ƒ.KEYBOARD_CODE.ARROW_UP]));
+        cntHeliPack.x.setInput(ƒ.Keyboard.mapToValue(-1, 0, [ƒ.KEYBOARD_CODE.A, ƒ.KEYBOARD_CODE.ARROW_LEFT])
+            + ƒ.Keyboard.mapToValue(1, 0, [ƒ.KEYBOARD_CODE.D, ƒ.KEYBOARD_CODE.ARROW_RIGHT]));
+        heliPack.input(cntHeliPack.x.getOutput(), cntHeliPack.z.getOutput());
     }
     function hndMouse(_event) {
         cntFlak.x.setInput(_event.movementX);
@@ -162,12 +206,14 @@ var UfoundLost;
         UfoundLost.graph.appendChild(origin);
         flak = new UfoundLost.Flak();
         UfoundLost.graph.appendChild(flak);
+        heliPack = new UfoundLost.HeliPack(ƒ.Vector3.Y(UfoundLost.heliPackDefinition.height), UfoundLost.heliPackDefinition.size);
+        UfoundLost.graph.appendChild(heliPack);
         let meshQuad = new ƒ.MeshQuad();
         let mtrWhite = new ƒ.Material("Background", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
         let background = new ƒAid.Node("Background", ƒ.Matrix4x4.IDENTITY(), mtrWhite, meshQuad);
-        background.mtxLocal.translate(new ƒ.Vector3(0, yCamera, -5));
+        background.mtxLocal.translate(new ƒ.Vector3(0, yCamera, -6));
         background.mtxLocal.scale(new ƒ.Vector3(16, 9, 1));
-        background.mtxLocal.scale(ƒ.Vector3.ONE(1.6));
+        background.mtxLocal.scale(ƒ.Vector3.ONE(1.7));
         background.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("darkblue");
         // background.mtxLocal.lookAt(viewport.camera.pivot.translation);
         UfoundLost.graph.appendChild(background);
@@ -191,11 +237,15 @@ var UfoundLost;
         let cmpMeshHeliSpace = heliSpace.getComponent(ƒ.ComponentMesh);
         cmpMeshHeliSpace.pivot.scale(UfoundLost.heliSpaceDefinition.size);
         heliSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("grey", 0.5);
+        cmpMeshHeliSpace.activate(false);
         UfoundLost.graph.appendChild(heliSpace);
         UfoundLost.viewport.draw(); // to calculate world transforms
         UfoundLost.ufoSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshUfoSpace.mtxWorld);
         UfoundLost.ufoSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshUfoSpace.mtxWorld);
         UfoundLost.heliSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliSpace.mtxWorld);
         UfoundLost.heliSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliSpace.mtxWorld);
+        let cmpMeshHeliPack = heliPack.getChildrenByName("Catcher")[0].getComponent(ƒ.ComponentMesh);
+        UfoundLost.heliPackDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliPack.mtxWorld);
+        UfoundLost.heliPackDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliPack.mtxWorld);
     }
 })(UfoundLost || (UfoundLost = {}));
