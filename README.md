@@ -15,10 +15,8 @@ In the evening, Elli and Monika already created some sprites and a first draft o
 A small design document was created to nail down some core functionality and behaviours.
 [Docu/Design.pdf](Docu/Design.pdf)
 
-<embed src="Docu/Design.pdf" type="application/pdf">
-<object data="Docu/Design.pdf" type="application/pdf" width="100%" height="50%">
-    <embed src="Docu/Design.pdf">
-    </embed>
+<object data="Docu/Design.pdf" type="application/pdf" width="100%" height="500px">
+    <embed src="Docu/Design.pdf"> </embed>
 </object>
 
 ## Day 4
