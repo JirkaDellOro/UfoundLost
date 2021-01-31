@@ -1,6 +1,5 @@
 ///<reference path="GameObject.ts"/>
 namespace UfoundLost {
-  import ƒAid = FudgeAid;
   export class Detonation extends GameObject {
     private static audio: ƒ.Audio = new ƒ.Audio("Audio/Detonation.mp3");
     private static material: ƒ.Material = new ƒ.Material("Detonation", ƒ.ShaderTexture,
@@ -15,7 +14,6 @@ namespace UfoundLost {
       let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(Detonation.audio);
       this.addComponent(cmpAudio);
       cmpAudio.play(true);
-      // window.setTimeout(() => cmpAudio.play(true), 100);
     }
 
     public update(_timeslice: number): boolean {

@@ -54,7 +54,7 @@ namespace UfoundLost {
     }
 
     public shoot(): void {
-      ƒ.Debug.fudge("shoot");
+      // ƒ.Debug.fudge("shoot");
       let detonation: Detonation = new Detonation(this.crosshair.mtxLocal.translation);
       this.detonations.appendChild(detonation);
 

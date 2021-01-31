@@ -37,7 +37,7 @@ namespace UfoundLost {
 
       let position: ƒ.Vector3 = this.mtxLocal.translation;
       let atTarget: boolean = this.mtxLocal.translation.isInsideSphere(this.posTarget, 2 * _timeslice * this.maxVelocity);
-      let jobPrevious: JOB = this.job;
+      // let jobPrevious: JOB = this.job;
       let cmpAudio: ƒ.ComponentAudio = this.getComponent(ƒ.ComponentAudio);
 
       switch (this.job) {
@@ -73,8 +73,10 @@ namespace UfoundLost {
           cmpAudio.volume = 0.5;
           cmpAudio.setAudio(Ufo.audioTractor);
           cmpAudio.play(true);
+          Villager.create(this);
           break;
         case JOB.TRACTOR:
+          this.tractor.getComponent(ƒ.ComponentMaterial).pivot.translateY(0.02);
           if (ƒ.Time.game.get() < this.timeForNextJob) break; // keep sucking
           this.tractor.getComponent(ƒ.ComponentMesh).activate(false);
           this.maxVelocity = 5;

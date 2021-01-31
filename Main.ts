@@ -29,6 +29,8 @@ namespace UfoundLost {
     flak = new Flak();
     graph.appendChild(flak);
 
+    graph.appendChild(Villager.all);
+
     let listener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
     ƒ.AudioManager.default.listenTo(graph);
     ƒ.AudioManager.default.listenWith(listener);
@@ -54,6 +56,7 @@ namespace UfoundLost {
     for (let ufo of ufos.getChildren() as Ufo[]) {
       ufo.update(timeslice);
     }
+    Villager.updateAll(timeslice);
 
     viewport.draw();
   }

@@ -58,7 +58,6 @@ var UfoundLost;
             let cmpAudio = new ƒ.ComponentAudio(Detonation.audio);
             this.addComponent(cmpAudio);
             cmpAudio.play(true);
-            // window.setTimeout(() => cmpAudio.play(true), 100);
         }
         update(_timeslice) {
             super.update(_timeslice);
@@ -112,7 +111,7 @@ var UfoundLost;
             this.crosshair.restrictPosition(UfoundLost.ufoSpaceDefinition.min, UfoundLost.ufoSpaceDefinition.max);
         }
         shoot() {
-            ƒ.Debug.fudge("shoot");
+            // ƒ.Debug.fudge("shoot");
             let detonation = new UfoundLost.Detonation(this.crosshair.mtxLocal.translation);
             this.detonations.appendChild(detonation);
             let pivot = Reflect.get(this.cannon, "barrelPivot");
@@ -214,6 +213,7 @@ var UfoundLost;
         createArmada(10);
         flak = new UfoundLost.Flak();
         UfoundLost.graph.appendChild(flak);
+        UfoundLost.graph.appendChild(UfoundLost.Villager.all);
         let listener = new ƒ.ComponentAudioListener();
         ƒ.AudioManager.default.listenTo(UfoundLost.graph);
         ƒ.AudioManager.default.listenWith(listener);
@@ -232,6 +232,7 @@ var UfoundLost;
         for (let ufo of ufos.getChildren()) {
             ufo.update(timeslice);
         }
+        UfoundLost.Villager.updateAll(timeslice);
         UfoundLost.viewport.draw();
     }
     function setupInteraction() {
@@ -352,7 +353,7 @@ var UfoundLost;
             super.update(_timeslice);
             let position = this.mtxLocal.translation;
             let atTarget = this.mtxLocal.translation.isInsideSphere(this.posTarget, 2 * _timeslice * this.maxVelocity);
-            let jobPrevious = this.job;
+            // let jobPrevious: JOB = this.job;
             let cmpAudio = this.getComponent(ƒ.ComponentAudio);
             switch (this.job) {
                 case JOB.ROAM:
@@ -390,8 +391,10 @@ var UfoundLost;
                     cmpAudio.volume = 0.5;
                     cmpAudio.setAudio(Ufo.audioTractor);
                     cmpAudio.play(true);
+                    UfoundLost.Villager.create(this);
                     break;
                 case JOB.TRACTOR:
+                    this.tractor.getComponent(ƒ.ComponentMaterial).pivot.translateY(0.02);
                     if (ƒ.Time.game.get() < this.timeForNextJob)
                         break; // keep sucking
                     this.tractor.getComponent(ƒ.ComponentMesh).activate(false);
@@ -434,4 +437,56 @@ var UfoundLost;
     Ufo.material = new ƒ.Material("Ufo", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/Ufo.png")));
     Ufo.mtrTractor = new ƒ.Material("Ufo", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white", 0.4), new ƒ.TextureImage("Images/TractorBeam.png")));
     UfoundLost.Ufo = Ufo;
+})(UfoundLost || (UfoundLost = {}));
+var UfoundLost;
+(function (UfoundLost) {
+    class Villager extends UfoundLost.GameObject {
+        constructor(_name, _ufo) {
+            super(_name, Villager.getStartPosition(_ufo), Villager.mtrMale, ƒ.Vector2.ONE(0.5));
+            this.sex = true; // Male by default
+            this.rotation = Math.random() * 4 - 2;
+            let cmpAudio = new ƒ.ComponentAudio(ƒ.Random.default.getElement(Villager.audioScreamsMale));
+            this.sex = (Math.random() < 0.4);
+            if (!this.sex) {
+                cmpAudio.setAudio(ƒ.Random.default.getElement(Villager.audioScreamsFemale));
+                this.getComponent(ƒ.ComponentMaterial).material = Villager.mtrFemale;
+            }
+            cmpAudio.volume = 0.5;
+            this.addComponent(cmpAudio);
+            // cmpAudio.play(true);
+            this.maxVelocity = 0.4;
+            this.setTargetPosition(_ufo.mtxLocal.translation);
+            this.getComponent(ƒ.ComponentMesh).pivot.translateY(0.2);
+            ƒ.Time.game.setTimer(1000, 1, () => this.getComponent(ƒ.ComponentAudio).play(true));
+            Villager.all.appendChild(this);
+        }
+        static getStartPosition(_ufo) {
+            let position = _ufo.mtxLocal.translation;
+            position.y = 0.5;
+            position.z += 0.01;
+            return position;
+        }
+        static create(_ufo) {
+            let villager = new Villager("Villager", _ufo);
+            return villager;
+        }
+        static updateAll(_timeslice) {
+            for (let villager of Villager.all.getChildren())
+                villager.update(_timeslice);
+        }
+        update(_timeslice) {
+            super.update(_timeslice);
+            this.getComponent(ƒ.ComponentMesh).pivot.rotateZ(this.rotation, true);
+        }
+    }
+    Villager.all = new ƒ.Node("Villagers");
+    Villager.audioScreamsMale = [
+        new ƒ.Audio("Audio/ScreamMale0.mp3"), new ƒ.Audio("Audio/ScreamMale1.mp3"), new ƒ.Audio("Audio/ScreamMale2.mp3"), new ƒ.Audio("Audio/ScreamMale3.mp3"), new ƒ.Audio("Audio/ScreamMale4.mp3"), new ƒ.Audio("Audio/ScreamMale5.mp3")
+    ];
+    Villager.audioScreamsFemale = [
+        new ƒ.Audio("Audio/ScreamFemale0.mp3"), new ƒ.Audio("Audio/ScreamFemale1.mp3"), new ƒ.Audio("Audio/ScreamFemale2.mp3"), new ƒ.Audio("Audio/ScreamFemale3.mp3"), new ƒ.Audio("Audio/ScreamFemale4.mp3")
+    ];
+    Villager.mtrMale = new ƒ.Material("VillagerMale", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/VillagerMale0.png")));
+    Villager.mtrFemale = new ƒ.Material("VillagerMale", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/VillagerFemale0.png")));
+    UfoundLost.Villager = Villager;
 })(UfoundLost || (UfoundLost = {}));
