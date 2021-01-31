@@ -36,6 +36,10 @@ namespace UfoundLost {
       this.posTarget = _position;
     }
 
+    public atTarget(_timeslice: number): boolean {
+      return this.mtxLocal.translation.isInsideSphere(this.posTarget, 2 * _timeslice * this.maxVelocity);
+    }
+
     public restrictPosition(_min: ƒ.Vector3, _max: ƒ.Vector3): void {
       let position: ƒ.Vector3 = this.mtxLocal.translation;
       if (position.isInsideCube(_min, _max))

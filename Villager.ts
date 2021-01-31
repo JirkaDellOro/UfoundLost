@@ -18,9 +18,12 @@ namespace UfoundLost {
 
     private sex: boolean = true; // Male by default
     private rotation: number = Math.random() * 4 - 2;
+    private falling: boolean = false;
+    private ufo: Ufo;
 
     constructor(_name: string, _ufo: Ufo) {
       super(_name, Villager.getStartPosition(_ufo), Villager.mtrMale, ƒ.Vector2.ONE(0.5));
+      this.ufo = _ufo;
 
       let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(ƒ.Random.default.getElement(Villager.audioScreamsMale));
       this.sex = (Math.random() < 0.4);
@@ -62,6 +65,33 @@ namespace UfoundLost {
     public update(_timeslice: number): void {
       super.update(_timeslice);
       this.getComponent(ƒ.ComponentMesh).pivot.rotateZ(this.rotation, true);
+
+      if (!this.falling) return;
+      if (this.mtxLocal.translation.y > 0) return;
+
+      ƒ.Debug.log("Splat!");
+      Villager.all.removeChild(this);
+      if (this.ufo)
+        this.ufo.loseVillager();
+    }
+
+    public setTargetPosition(_position: ƒ.Vector3): void {
+      super.setTargetPosition(_position);
+      this.falling = false;
+    }
+
+    public capture(): void {
+      ƒ.Debug.log("Villager captured");
+      Villager.all.removeChild(this);
+    }
+
+    public fall(): void {
+      this.velocity = ƒ.Vector3.Y(-1);
+      this.falling = true;
+    }
+
+    public loseUfo(): void {
+      this.ufo = null;
     }
   }
 }

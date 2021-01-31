@@ -30,6 +30,9 @@ var UfoundLost;
                 this.velocity.normalize(this.maxVelocity);
             this.posTarget = _position;
         }
+        atTarget(_timeslice) {
+            return this.mtxLocal.translation.isInsideSphere(this.posTarget, 2 * _timeslice * this.maxVelocity);
+        }
         restrictPosition(_min, _max) {
             let position = this.mtxLocal.translation;
             if (position.isInsideCube(_min, _max))
@@ -58,6 +61,7 @@ var UfoundLost;
             let cmpAudio = new ƒ.ComponentAudio(Detonation.audio);
             this.addComponent(cmpAudio);
             cmpAudio.play(true);
+            UfoundLost.Ufo.checkAllForHit(_position, Detonation.radius);
         }
         update(_timeslice) {
             super.update(_timeslice);
@@ -205,12 +209,12 @@ var UfoundLost;
     const cntHeliPack = { x: new ƒ.Control("HeliPackX", 0.1), z: new ƒ.Control("HeliPackZ", 0.1), delay: 500 };
     let flak;
     let heliPack;
-    let ufos;
     function start(_event) {
-        ƒ.Debug.fudge("UfoundLost starts");
+        ƒ.Debug.log("UfoundLost starts");
         createViewport();
         createScene();
         createArmada(10);
+        UfoundLost.graph.appendChild(UfoundLost.Ufo.all);
         flak = new UfoundLost.Flak();
         UfoundLost.graph.appendChild(flak);
         UfoundLost.graph.appendChild(UfoundLost.Villager.all);
@@ -225,13 +229,10 @@ var UfoundLost;
         ƒ.Loop.start();
     }
     function update(_event) {
-        // ƒ.Debug.fudge("udpate");
         let timeslice = ƒ.Loop.timeFrameGame / 1000;
         flak.update(timeslice);
         controlHeliPack(timeslice);
-        for (let ufo of ufos.getChildren()) {
-            ufo.update(timeslice);
-        }
+        UfoundLost.Ufo.updateAll(timeslice);
         UfoundLost.Villager.updateAll(timeslice);
         UfoundLost.viewport.draw();
     }
@@ -256,8 +257,7 @@ var UfoundLost;
     function hndMouse(_event) {
         cntFlak.x.setInput(_event.movementX);
         cntFlak.z.setInput(_event.movementY);
-        if (_event.type == "wheel")
-            cntFlak.y.setInput(_event.deltaY);
+        cntFlak.y.setInput((_event.type == "wheel") ? _event.deltaY : 0);
         flak.input(cntFlak.x.getOutput(), cntFlak.y.getOutput(), cntFlak.z.getOutput());
     }
     function createViewport() {
@@ -271,11 +271,8 @@ var UfoundLost;
         UfoundLost.viewport.initialize("Viewport", UfoundLost.graph, cmpCamera, canvas);
     }
     function createArmada(_nUfos) {
-        ufos = new ƒ.Node("Ufos");
-        UfoundLost.graph.appendChild(ufos);
         for (let i = 0; i < _nUfos; i++) {
-            let ufo = new UfoundLost.Ufo();
-            ufos.appendChild(ufo);
+            new UfoundLost.Ufo();
         }
     }
     function createScene() {
@@ -337,22 +334,57 @@ var UfoundLost;
         JOB[JOB["PREPARE"] = 2] = "PREPARE";
         JOB[JOB["TRACTOR"] = 3] = "TRACTOR";
         JOB[JOB["EVADE"] = 4] = "EVADE";
-        JOB[JOB["EXPLODE"] = 5] = "EXPLODE";
+        JOB[JOB["HIT"] = 5] = "HIT";
+        JOB[JOB["STRUGGLE"] = 6] = "STRUGGLE";
+        JOB[JOB["EXPLODE"] = 7] = "EXPLODE";
     })(JOB || (JOB = {}));
     class Ufo extends UfoundLost.GameObject {
         constructor() {
             super("Ufo", Ufo.getStartPosition(), Ufo.material, ƒ.Vector2.ONE(0.5));
             this.timeForNextJob = 0;
+            this.damage = 0;
+            this.timeToWiggle = 0;
             this.tractor = this.createTractorBeam();
-            this.job = JOB.ROAM;
-            this.maxVelocity = 5;
-            this.findTargetPosition();
             this.addComponent(new ƒ.ComponentAudio());
+            this.addComponent(new ƒ.ComponentAudio(Ufo.audioHit)); // for hit sound
+            Ufo.all.appendChild(this);
+            this.roam();
+        }
+        static updateAll(_timeslice) {
+            for (let ufo of Ufo.all.getChildren())
+                ufo.update(_timeslice);
+        }
+        static checkAllForHit(_position, _radius) {
+            for (let ufo of Ufo.all.getChildren())
+                if (ufo.mtxLocal.translation.isInsideSphere(_position, _radius))
+                    ufo.hit(1 - ƒ.Vector3.DIFFERENCE(ufo.mtxLocal.translation, _position).magnitude / _radius);
+        }
+        hit(_power) {
+            // ƒ.Debug.warn(_power);
+            let cmpAudio = this.getComponents(ƒ.ComponentAudio)[1];
+            cmpAudio.volume = _power;
+            cmpAudio.play(true);
+            if (this.villager)
+                this.villager.fall();
+            // this.damage += _power;
+            if (this.damage > 1) {
+                this.job = JOB.EXPLODE;
+                return;
+            }
+            this.timeToWiggle = ƒ.Time.game.get() + Ufo.maxTimeToWiggle * _power;
+            if (this.job == JOB.TRACTOR)
+                this.job = JOB.STRUGGLE;
+            else
+                this.job = JOB.HIT;
+        }
+        loseVillager() {
+            this.villager = null;
+            this.job = JOB.HIT;
         }
         update(_timeslice) {
             super.update(_timeslice);
             let position = this.mtxLocal.translation;
-            let atTarget = this.mtxLocal.translation.isInsideSphere(this.posTarget, 2 * _timeslice * this.maxVelocity);
+            let atTarget = this.atTarget(_timeslice);
             // let jobPrevious: JOB = this.job;
             let cmpAudio = this.getComponent(ƒ.ComponentAudio);
             switch (this.job) {
@@ -375,36 +407,79 @@ var UfoundLost;
                         cmpAudio.play(true);
                         break;
                     }
-                    this.findTargetPosition();
-                    this.job = JOB.ROAM;
-                    cmpAudio.volume = 1;
-                    cmpAudio.setAudio(ƒ.Random.default.getElement(Ufo.audioMoves));
-                    cmpAudio.play(true);
+                    this.roam();
                     break;
                 case JOB.PREPARE:
                     if (!atTarget)
                         break; // keep preparing
                     this.job = JOB.TRACTOR;
                     this.velocity = ƒ.Vector3.ZERO();
-                    this.tractor.getComponent(ƒ.ComponentMesh).activate(true);
+                    this.activateTractor(true);
                     this.timeForNextJob = ƒ.Time.game.get() + 1000 * ƒ.Random.default.getRange(10, 15);
                     cmpAudio.volume = 0.5;
                     cmpAudio.setAudio(Ufo.audioTractor);
                     cmpAudio.play(true);
-                    UfoundLost.Villager.create(this);
+                    this.villager = UfoundLost.Villager.create(this);
                     break;
                 case JOB.TRACTOR:
                     this.tractor.getComponent(ƒ.ComponentMaterial).pivot.translateY(0.02);
-                    if (ƒ.Time.game.get() < this.timeForNextJob)
+                    // if (ƒ.Time.game.get() < this.timeForNextJob) break; // keep sucking
+                    if (!this.villager.atTarget(_timeslice))
                         break; // keep sucking
-                    this.tractor.getComponent(ƒ.ComponentMesh).activate(false);
-                    this.maxVelocity = 5;
-                    this.findTargetPosition();
-                    this.job = JOB.ROAM;
+                    this.villager.capture();
+                    this.villager = null;
+                    this.roam();
+                    break;
+                case JOB.HIT:
+                    if (this.wiggle())
+                        break; // keep wiggeling
+                    this.roam();
+                    break;
+                case JOB.STRUGGLE:
+                    this.activateTractor(ƒ.Random.default.getBoolean());
+                    if (this.wiggle())
+                        break; // keep wiggeling
+                    this.activateTractor(this.villager != null);
+                    if (!this.villager)
+                        this.roam();
+                    else {
+                        this.activateTractor(true);
+                        this.villager.setTargetPosition(this.mtxLocal.translation);
+                        this.job = JOB.TRACTOR;
+                    }
+                    break;
+                case JOB.EXPLODE:
+                    Ufo.all.removeChild(this);
+                    if (this.villager)
+                        this.villager.loseUfo();
                     break;
             }
             // if (jobPrevious != this.job)
-            //   ƒ.Debug.fudge(JOB[this.job]);
+            // ƒ.Debug.fudge(JOB[this.job]);
+        }
+        activateTractor(_on) {
+            this.tractor.getComponent(ƒ.ComponentMesh).activate(_on);
+        }
+        roam() {
+            this.activateTractor(false);
+            this.maxVelocity = Ufo.maxVelocity;
+            this.findTargetPosition();
+            this.job = JOB.ROAM;
+            let cmpAudio = this.getComponent(ƒ.ComponentAudio);
+            cmpAudio.volume = 1;
+            cmpAudio.setAudio(ƒ.Random.default.getElement(Ufo.audioMoves));
+            cmpAudio.play(true);
+        }
+        wiggle() {
+            let wiggle = (this.timeToWiggle - ƒ.Time.game.get()) / Ufo.maxTimeToWiggle;
+            let angle = 0;
+            if (wiggle < 0) {
+                this.mtxLocal.rotation = ƒ.Vector3.ZERO();
+                return false;
+            }
+            angle = wiggle * 60 * Math.sin(wiggle * 10 * Math.PI);
+            this.mtxLocal.mutate({ rotation: { z: angle } });
+            return true;
         }
         createTractorBeam() {
             this.tractor = new UfoundLost.GameObject("TractorBeam", ƒ.Vector3.ZERO(), Ufo.mtrTractor);
@@ -427,15 +502,19 @@ var UfoundLost;
             this.setTargetPosition(ƒ.Random.default.getVector3(UfoundLost.ufoSpaceDefinition.min, UfoundLost.ufoSpaceDefinition.max));
         }
     }
+    Ufo.all = new ƒ.Node("Ufos");
     Ufo.audioMoves = [
         new ƒ.Audio("Audio/UfoMove0.mp3"), new ƒ.Audio("Audio/UfoMove1.mp3"), new ƒ.Audio("Audio/UfoMove2.mp3")
     ];
     Ufo.audioPrepare = new ƒ.Audio("Audio/Ufo0.mp3");
     Ufo.audioTractor = new ƒ.Audio("Audio/Beam0.mp3");
+    Ufo.audioHit = new ƒ.Audio("Audio/UfoHit.mp3");
     // private static material: ƒ.Material = new ƒ.Material("Ufo", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("black", 0.5)));
     // private static mtrTractor: ƒ.Material = new ƒ.Material("Ufo", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("pink", 0.5)));
     Ufo.material = new ƒ.Material("Ufo", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/Ufo.png")));
     Ufo.mtrTractor = new ƒ.Material("Ufo", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white", 0.4), new ƒ.TextureImage("Images/TractorBeam.png")));
+    Ufo.maxTimeToWiggle = 2000; //milliseconds
+    Ufo.maxVelocity = 5;
     UfoundLost.Ufo = Ufo;
 })(UfoundLost || (UfoundLost = {}));
 var UfoundLost;
@@ -445,6 +524,8 @@ var UfoundLost;
             super(_name, Villager.getStartPosition(_ufo), Villager.mtrMale, ƒ.Vector2.ONE(0.5));
             this.sex = true; // Male by default
             this.rotation = Math.random() * 4 - 2;
+            this.falling = false;
+            this.ufo = _ufo;
             let cmpAudio = new ƒ.ComponentAudio(ƒ.Random.default.getElement(Villager.audioScreamsMale));
             this.sex = (Math.random() < 0.4);
             if (!this.sex) {
@@ -477,6 +558,29 @@ var UfoundLost;
         update(_timeslice) {
             super.update(_timeslice);
             this.getComponent(ƒ.ComponentMesh).pivot.rotateZ(this.rotation, true);
+            if (!this.falling)
+                return;
+            if (this.mtxLocal.translation.y > 0)
+                return;
+            ƒ.Debug.log("Splat!");
+            Villager.all.removeChild(this);
+            if (this.ufo)
+                this.ufo.loseVillager();
+        }
+        setTargetPosition(_position) {
+            super.setTargetPosition(_position);
+            this.falling = false;
+        }
+        capture() {
+            ƒ.Debug.log("Villager captured");
+            Villager.all.removeChild(this);
+        }
+        fall() {
+            this.velocity = ƒ.Vector3.Y(-1);
+            this.falling = true;
+        }
+        loseUfo() {
+            this.ufo = null;
         }
     }
     Villager.all = new ƒ.Node("Villagers");

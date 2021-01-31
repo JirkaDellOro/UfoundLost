@@ -14,6 +14,8 @@ namespace UfoundLost {
       let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(Detonation.audio);
       this.addComponent(cmpAudio);
       cmpAudio.play(true);
+
+      Ufo.checkAllForHit(_position, Detonation.radius);
     }
 
     public update(_timeslice: number): boolean {

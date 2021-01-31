@@ -17,14 +17,14 @@ namespace UfoundLost {
 
   let flak: Flak;
   let heliPack: HeliPack;
-  let ufos: ƒ.Node;
 
   function start(_event: Event): void {
-    ƒ.Debug.fudge("UfoundLost starts");
+    ƒ.Debug.log("UfoundLost starts");
 
     createViewport();
     createScene();
     createArmada(10);
+    graph.appendChild(Ufo.all);
 
     flak = new Flak();
     graph.appendChild(flak);
@@ -47,15 +47,12 @@ namespace UfoundLost {
   }
 
   function update(_event: Event): void {
-    // ƒ.Debug.fudge("udpate");
     let timeslice = ƒ.Loop.timeFrameGame / 1000;
 
     flak.update(timeslice);
     controlHeliPack(timeslice);
 
-    for (let ufo of ufos.getChildren() as Ufo[]) {
-      ufo.update(timeslice);
-    }
+    Ufo.updateAll(timeslice);
     Villager.updateAll(timeslice);
 
     viewport.draw();
@@ -91,8 +88,7 @@ namespace UfoundLost {
   function hndMouse(_event: MouseEvent | WheelEvent): void {
     cntFlak.x.setInput(_event.movementX);
     cntFlak.z.setInput(_event.movementY);
-    if (_event.type == "wheel")
-      cntFlak.y.setInput((<WheelEvent>_event).deltaY);
+    cntFlak.y.setInput((_event.type == "wheel") ? (<WheelEvent>_event).deltaY : 0);
 
     flak.input(cntFlak.x.getOutput(), cntFlak.y.getOutput(), cntFlak.z.getOutput());
   }
@@ -111,11 +107,8 @@ namespace UfoundLost {
   }
 
   function createArmada(_nUfos: number): void {
-    ufos = new ƒ.Node("Ufos");
-    graph.appendChild(ufos);
     for (let i: number = 0; i < _nUfos; i++) {
-      let ufo: Ufo = new Ufo();
-      ufos.appendChild(ufo);
+      new Ufo();
     }
   }
 
