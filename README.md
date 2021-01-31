@@ -75,16 +75,13 @@ Helicopters can now save falling villagers with the net... or chop them up!
 
 ### 17.00 (5pm)
 IT'S ALIVE!  
-And the Global Game Jam is over. We managed to get a prototype working in time and uploaded it the gamejamsite. See  
-https://globalgamejam.org/2021/games/ufoundlost-5  
+And the Global Game Jam is over. We managed to get a prototype working in time and uploaded to the [jamsite](https://globalgamejam.org/2021/games/ufoundlost-5)  
 
-We had four teams in the Spiellabor (Gameslab), all of them presented their prototypes and designs. All of them are functional. See  
-https://globalgamejam.org/2021/jam-sites/spiellabor-der-hochschule-furtwangen-university/games
+We had four teams in the Spiellabor (Gameslab), all of them presented their prototypes and designs. All of them are functional. [See them all](https://globalgamejam.org/2021/jam-sites/spiellabor-der-hochschule-furtwangen-university/games)
 
 They were created using FUDGE, Unity, Unreal and Godot. The Godot-Export didn't work, so it was not uploaded, but the presentation was impressive. We had those on Twitch, see next paragraph.
 
 # Presentations Global Game Jam Spiellabor 2021
-## UfoundLost & Globo De Lumo (Design)
-https://www.twitch.tv/videos/895561829
-## Globo De Lumo (Prototype) & Don't Lose A Beat & Frostshock
-https://www.twitch.tv/videos/895585583
+After our uploads the teams met in discord to present the creations of the last few days. The meeting and presentations were done in German and streamed to Twitch. See  
+- [UfoundLost & Globo De Lumo (Design)](https://www.twitch.tv/videos/895561829)  
+- [Globo De Lumo (Prototype) & Don't Lose A Beat & Frostshock](https://www.twitch.tv/videos/895585583)  
