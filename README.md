@@ -66,4 +66,9 @@ Ufos now suck up villagers with their tractor beam. When a flak projectile deton
 ### 13.00 (1pm)
 Oh my god! Ellie created the most amazing title poster!
 ![](Docu/Titlescreen.png)  
-By the way: SPLAT is now visible and audible...
+By the way: SPLAT is now visible and audible...  
+
+### 15.00 (3pm)
+Helicopters can now save falling villagers with the net... or chop them up!
+![](Docu/Helicopters.gif)  
+[Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/0f3ca54056da7ede3f491573d04c2021dcfb8143)  

@@ -32,9 +32,9 @@ namespace UfoundLost {
       this.appendChild(net);
       this.catcher = new ƒAid.Node("Catcher", ƒ.Matrix4x4.IDENTITY(), HeliPack.mtrCatcherBox, HeliPack.mesh);
       let cmpMeshCatcher: ƒ.ComponentMesh = this.catcher.getComponent(ƒ.ComponentMesh);
-      cmpMeshCatcher.pivot.translateY(-0.1);
+      cmpMeshCatcher.pivot.translateY(-0.22);
       cmpMeshCatcher.pivot.scale(_size);
-      cmpMeshCatcher.pivot.scaleY(0.5);
+      cmpMeshCatcher.pivot.scaleY(0.3);
       // cmpMeshCatcher.activate(false);
       this.appendChild(this.catcher);
       this.calculateBox();
