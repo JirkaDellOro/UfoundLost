@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="UfoundLost.css">
   <script src="FUDGE/Core/FudgeCore.js"></script>
   <script src="FUDGE/Aid/FudgeAid.js"></script>
+  <script src="FUDGE/UserInterface/FudgeUserInterface.js"></script>
   <script src="UfoundLost.js"></script>
 </head>
 
@@ -39,6 +40,17 @@
     <p>Make sure your sound is active but not too loud</p>
     <h2>Click to make the cursor disappear and start the game</h2>
   </div>
+  
+  <div id="Hud">
+    Villagers 
+    dead <input type="number" key="vDead" disabled />
+    saved <input type="number" key="vSaved" disabled />
+    kidnapped <input type="number" key="vKidnapped" disabled /> | 
+    Aliens 
+    killed <input type="number" key="aDead" disabled />
+    saved <input type="number" key="aSaved" disabled />
+  </div>
+
 </body>
 
 </html>

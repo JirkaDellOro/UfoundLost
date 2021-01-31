@@ -44,6 +44,9 @@ namespace UfoundLost {
     canvas.addEventListener("click", canvas.requestPointerLock);
     await new Promise((_resolve) => { canvas.addEventListener("click", _resolve);});
     description.style.display = "none";
+    
+    let divHud: HTMLDivElement = document.querySelector("div#Hud");
+    divHud.style.display = "block";
 
     setupInteraction();
 
@@ -56,6 +59,8 @@ namespace UfoundLost {
     graph.appendChild(flak);
 
     graph.appendChild(Villager.all);
+
+    Hud.start();
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();

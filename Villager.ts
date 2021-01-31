@@ -71,10 +71,14 @@ namespace UfoundLost {
       let heliCatch: HELI = heliPack.catch(this);
       if (heliCatch == HELI.NONE && this.mtxLocal.translation.y > 0) return;
 
-      if (heliCatch != HELI.CAUGHT)
+      if (heliCatch != HELI.CAUGHT) {
         Splat.create(this.mtxLocal.translation, this instanceof Alien);
-      else
+        this instanceof Alien ? gameState.aDead++ : gameState.vDead++;
+      }
+      else {
         ƒ.Debug.log("Villager saved!");
+        this instanceof Alien ? gameState.aSaved++ : gameState.vSaved++;
+      }
 
       Villager.all.removeChild(this);
       if (this.ufo)
@@ -89,6 +93,7 @@ namespace UfoundLost {
     public capture(): void {
       ƒ.Debug.log("Villager captured");
       Villager.all.removeChild(this);
+      gameState.vKidnapped++;
     }
 
     public fall(): void {

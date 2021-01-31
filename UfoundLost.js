@@ -95,10 +95,14 @@ var UfoundLost;
             let heliCatch = UfoundLost.heliPack.catch(this);
             if (heliCatch == UfoundLost.HELI.NONE && this.mtxLocal.translation.y > 0)
                 return;
-            if (heliCatch != UfoundLost.HELI.CAUGHT)
+            if (heliCatch != UfoundLost.HELI.CAUGHT) {
                 UfoundLost.Splat.create(this.mtxLocal.translation, this instanceof UfoundLost.Alien);
-            else
+                this instanceof UfoundLost.Alien ? UfoundLost.gameState.aDead++ : UfoundLost.gameState.vDead++;
+            }
+            else {
                 ƒ.Debug.log("Villager saved!");
+                this instanceof UfoundLost.Alien ? UfoundLost.gameState.aSaved++ : UfoundLost.gameState.vSaved++;
+            }
             Villager.all.removeChild(this);
             if (this.ufo)
                 this.ufo.loseVillager();
@@ -110,6 +114,7 @@ var UfoundLost;
         capture() {
             ƒ.Debug.log("Villager captured");
             Villager.all.removeChild(this);
+            UfoundLost.gameState.vKidnapped++;
         }
         fall() {
             this.velocity = ƒ.Vector3.Y(-1);
@@ -322,6 +327,31 @@ var UfoundLost;
 })(UfoundLost || (UfoundLost = {}));
 var UfoundLost;
 (function (UfoundLost) {
+    var ƒui = FudgeUserInterface;
+    class GameState extends ƒ.Mutable {
+        constructor() {
+            super(...arguments);
+            this.vKidnapped = 0;
+            this.vDead = 0;
+            this.vSaved = 0;
+            this.aDead = 0;
+            this.aSaved = 0;
+        }
+        reduceMutator(_mutator) { }
+    }
+    UfoundLost.GameState = GameState;
+    UfoundLost.gameState = new GameState();
+    class Hud {
+        static start() {
+            let domHud = document.querySelector("div#Hud");
+            Hud.controller = new ƒui.Controller(UfoundLost.gameState, domHud);
+            Hud.controller.updateUserInterface();
+        }
+    }
+    UfoundLost.Hud = Hud;
+})(UfoundLost || (UfoundLost = {}));
+var UfoundLost;
+(function (UfoundLost) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
     const yCamera = 4;
@@ -356,6 +386,8 @@ var UfoundLost;
         canvas.addEventListener("click", canvas.requestPointerLock);
         await new Promise((_resolve) => { canvas.addEventListener("click", _resolve); });
         description.style.display = "none";
+        let divHud = document.querySelector("div#Hud");
+        divHud.style.display = "block";
         setupInteraction();
         createViewport();
         createScene();
@@ -364,6 +396,7 @@ var UfoundLost;
         flak = new UfoundLost.Flak();
         UfoundLost.graph.appendChild(flak);
         UfoundLost.graph.appendChild(UfoundLost.Villager.all);
+        UfoundLost.Hud.start();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
     }

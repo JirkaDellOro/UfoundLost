@@ -12,6 +12,13 @@ canvas {
   background-color: black;
 }
 
+div {
+  text-align: block;
+  font-size: 20px;
+  color: #dcb63c;
+  font-family: "Courier New", monospace;
+}
+
 div#Title {
   cursor: pointer;
 }
@@ -22,18 +29,26 @@ div#Description {
   pointer-events: none;
   display: none;
   position: fixed;
-  text-align: block;
-  font-size: 20px;
-  color: #dcb63c;
   top: 20px;
   width: 100%;
-  font-family: "Courier New", monospace;
   margin-left: 10%;
-  padding: 0;
   width: 80%;
 }
 
 h1, h2 {
   text-align: center;
   font-size: 36px;
+}
+
+div#Hud {
+  display: none;
+  position: fixed;
+  top: 98%;
+}
+
+input {
+  width: 3em;
+  background-color: black;
+  color: #dcb63c;
+
 }
