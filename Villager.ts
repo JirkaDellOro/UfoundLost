@@ -72,10 +72,10 @@ namespace UfoundLost {
       if (heliCatch == HELI.NONE && this.mtxLocal.translation.y > 0) return;
 
       if (heliCatch != HELI.CAUGHT)
-        Splat.create(this.mtxLocal.translation);
+        Splat.create(this.mtxLocal.translation, this instanceof Alien);
       else
         ƒ.Debug.log("Villager saved!");
-        
+
       Villager.all.removeChild(this);
       if (this.ufo)
         this.ufo.loseVillager();

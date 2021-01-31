@@ -62,7 +62,7 @@ namespace UfoundLost {
       if (this.villager)
         this.villager.fall();
 
-      // this.damage += _power;
+      this.damage += _power;
       if (this.damage > 1) {
         this.job = JOB.EXPLODE;
         return;
@@ -147,6 +147,7 @@ namespace UfoundLost {
           Ufo.all.removeChild(this);
           if (this.villager)
             this.villager.loseUfo();
+          new Alien("Alien", this);
           break;
       }
       // if (jobPrevious != this.job)
