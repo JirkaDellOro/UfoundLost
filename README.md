@@ -57,3 +57,7 @@ Sounds edited and integrated! Time to sleep...
 
 ## Day 5 (Final)
 It's 7.00 (7am), coffee is hot and a snack is prepared... let's get some villagers kidnapped.
+
+### 11.00 (11am)
+Ufos now suck up villagers with their tractor beam. When a flak projectile detonates near them, they wiggle and lose the villager they are about to suck. If they stabilize in time to find the villager again with the beam, the keep pulling them up. Otherwise... SPLAT!  
+![](Docu/Villagers.gif)  
