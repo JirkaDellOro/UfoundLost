@@ -54,3 +54,6 @@ Integrated Ellie's pixel art!!
 
 ### 24.00 (0am)
 Sounds edited and integrated! Time to sleep...
+
+## Day 5 (Final)
+It's 7.00 (7am), coffee is hot and a snack is prepared... let's get some villagers kidnapped.
