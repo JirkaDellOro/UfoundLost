@@ -11,7 +11,7 @@ namespace UfoundLost {
     constructor(_name: string, _ufo: Ufo) {
       super(_name, _ufo);
       let cmpAudio: ƒ.ComponentAudio = this.getComponent(ƒ.ComponentAudio);
-      cmpAudio.setAudio(Alien.audio));
+      cmpAudio.setAudio(Alien.audio);
       this.getComponent(ƒ.ComponentMaterial).material = Alien.material;
       this.mtxLocal.translation = _ufo.mtxLocal.translation;
       this.fall();
