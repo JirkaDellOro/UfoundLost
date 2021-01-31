@@ -61,3 +61,4 @@ It's 7.00 (7am), coffee is hot and a snack is prepared... let's get some village
 ### 11.00 (11am)
 Ufos now suck up villagers with their tractor beam. When a flak projectile detonates near them, they wiggle and lose the villager they are about to suck. If they stabilize in time to find the villager again with the beam, the keep pulling them up. Otherwise... SPLAT!  
 ![](Docu/Villagers.gif)  
+[Browse the repository at this point of time](https://github.com/JirkaDellOro/UfoundLost/tree/0f3ca54056da7ede3f491573d04c2021dcfb8143)  
