@@ -22,9 +22,9 @@ namespace UfoundLost {
 
   function waitForInteraction(_event: Event): void {
     canvas = document.querySelector("canvas");
-    let dialog: HTMLDialogElement = document.querySelector("dialog");
-    dialog.addEventListener("click", () => {
-      document.querySelector("dialog").close();
+    let div: HTMLDivElement = document.querySelector("div#Title");
+    div.addEventListener("click", () => {
+      div.style.display = "none";
       start();
     });
   }
@@ -32,10 +32,18 @@ namespace UfoundLost {
   async function start(): Promise<void> {
     ƒ.Debug.log("UfoundLost starts");
     
-    document.querySelector("div").style.display = "block";
+    let listener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
+    ƒ.AudioManager.default.listenTo(graph);
+    ƒ.AudioManager.default.listenWith(listener);
+    graph.addComponent(listener);
+    let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(new ƒ.Audio("Audio/Atmo.mp3"), true, true);
+    graph.addComponent(cmpAudio);
+
+    let description: HTMLDivElement = document.querySelector("div#Description");
+    description.style.display = "block";
     canvas.addEventListener("click", canvas.requestPointerLock);
     await new Promise((_resolve) => { canvas.addEventListener("click", _resolve);});
-    document.querySelector("div").style.display = "none";
+    description.style.display = "none";
 
     setupInteraction();
 
@@ -48,16 +56,6 @@ namespace UfoundLost {
     graph.appendChild(flak);
 
     graph.appendChild(Villager.all);
-
-    let listener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
-    ƒ.AudioManager.default.listenTo(graph);
-    ƒ.AudioManager.default.listenWith(listener);
-    graph.addComponent(listener);
-
-    let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(new ƒ.Audio("Audio/Atmo.mp3"), true, true);
-    graph.addComponent(cmpAudio);
-
-
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();

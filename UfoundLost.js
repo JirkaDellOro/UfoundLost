@@ -234,18 +234,25 @@ var UfoundLost;
     let canvas;
     function waitForInteraction(_event) {
         canvas = document.querySelector("canvas");
-        let dialog = document.querySelector("dialog");
-        dialog.addEventListener("click", () => {
-            document.querySelector("dialog").close();
+        let div = document.querySelector("div#Title");
+        div.addEventListener("click", () => {
+            div.style.display = "none";
             start();
         });
     }
     async function start() {
         ƒ.Debug.log("UfoundLost starts");
-        document.querySelector("div").style.display = "block";
+        let listener = new ƒ.ComponentAudioListener();
+        ƒ.AudioManager.default.listenTo(UfoundLost.graph);
+        ƒ.AudioManager.default.listenWith(listener);
+        UfoundLost.graph.addComponent(listener);
+        let cmpAudio = new ƒ.ComponentAudio(new ƒ.Audio("Audio/Atmo.mp3"), true, true);
+        UfoundLost.graph.addComponent(cmpAudio);
+        let description = document.querySelector("div#Description");
+        description.style.display = "block";
         canvas.addEventListener("click", canvas.requestPointerLock);
         await new Promise((_resolve) => { canvas.addEventListener("click", _resolve); });
-        document.querySelector("div").style.display = "none";
+        description.style.display = "none";
         setupInteraction();
         createViewport();
         createScene();
@@ -254,12 +261,6 @@ var UfoundLost;
         flak = new UfoundLost.Flak();
         UfoundLost.graph.appendChild(flak);
         UfoundLost.graph.appendChild(UfoundLost.Villager.all);
-        let listener = new ƒ.ComponentAudioListener();
-        ƒ.AudioManager.default.listenTo(UfoundLost.graph);
-        ƒ.AudioManager.default.listenWith(listener);
-        UfoundLost.graph.addComponent(listener);
-        let cmpAudio = new ƒ.ComponentAudio(new ƒ.Audio("Audio/Atmo.mp3"), true, true);
-        UfoundLost.graph.addComponent(cmpAudio);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
     }

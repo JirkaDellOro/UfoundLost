@@ -1,4 +1,4 @@
-html, body, canvas, img, dialog {
+html, body, canvas, img, div {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -12,16 +12,28 @@ canvas {
   background-color: black;
 }
 
-dialog {
+div#Title {
   cursor: pointer;
 }
 
-div {
+div#Description {
+  background: url(Images/BackgroundControls.png) no-repeat;
+  background-position: center;
   pointer-events: none;
   display: none;
   position: fixed;
-  text-align: center;
-  color: coral;
-  top:20px;
+  text-align: block;
+  font-size: 20px;
+  color: #dcb63c;
+  top: 20px;
   width: 100%;
+  font-family: "Courier New", monospace;
+  margin-left: 10%;
+  padding: 0;
+  width: 80%;
+}
+
+h1, h2 {
+  text-align: center;
+  font-size: 36px;
 }
