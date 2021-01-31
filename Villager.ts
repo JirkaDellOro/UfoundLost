@@ -69,7 +69,8 @@ namespace UfoundLost {
       if (!this.falling) return;
       if (this.mtxLocal.translation.y > 0) return;
 
-      ƒ.Debug.log("Splat!");
+      // ƒ.Debug.log("Splat!");
+      Splat.create(this.mtxLocal.translation);
       Villager.all.removeChild(this);
       if (this.ufo)
         this.ufo.loseVillager();
@@ -92,6 +93,7 @@ namespace UfoundLost {
 
     public loseUfo(): void {
       this.ufo = null;
+      this.fall();
     }
   }
 }

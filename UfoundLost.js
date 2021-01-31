@@ -198,7 +198,6 @@ var UfoundLost;
 (function (UfoundLost) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    window.addEventListener("load", start);
     const yCamera = 4;
     UfoundLost.viewport = new ƒ.Viewport();
     UfoundLost.graph = new ƒ.Node("MainGraph");
@@ -209,8 +208,23 @@ var UfoundLost;
     const cntHeliPack = { x: new ƒ.Control("HeliPackX", 0.1), z: new ƒ.Control("HeliPackZ", 0.1), delay: 500 };
     let flak;
     let heliPack;
-    function start(_event) {
+    window.addEventListener("load", waitForInteraction);
+    let canvas;
+    function waitForInteraction(_event) {
+        canvas = document.querySelector("canvas");
+        let dialog = document.querySelector("dialog");
+        dialog.addEventListener("click", () => {
+            document.querySelector("dialog").close();
+            start();
+        });
+    }
+    async function start() {
         ƒ.Debug.log("UfoundLost starts");
+        document.querySelector("div").style.display = "block";
+        canvas.addEventListener("click", canvas.requestPointerLock);
+        await new Promise((_resolve) => { canvas.addEventListener("click", _resolve); });
+        document.querySelector("div").style.display = "none";
+        setupInteraction();
         createViewport();
         createScene();
         createArmada(10);
@@ -224,7 +238,6 @@ var UfoundLost;
         UfoundLost.graph.addComponent(listener);
         let cmpAudio = new ƒ.ComponentAudio(new ƒ.Audio("Audio/Atmo.mp3"), true, true);
         UfoundLost.graph.addComponent(cmpAudio);
-        setupInteraction();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
     }
@@ -237,12 +250,8 @@ var UfoundLost;
         UfoundLost.viewport.draw();
     }
     function setupInteraction() {
-        let canvas = document.querySelector("canvas");
-        if (!canvas)
-            return;
         canvas.addEventListener("mousemove", hndMouse);
         canvas.addEventListener("wheel", hndMouse);
-        canvas.addEventListener("click", canvas.requestPointerLock);
         canvas.addEventListener("pointerdown", (_event) => flak.shoot());
         cntHeliPack.x.setDelay(cntHeliPack.delay);
         cntHeliPack.z.setDelay(cntHeliPack.delay);
@@ -323,6 +332,38 @@ var UfoundLost;
         UfoundLost.heliPackDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliPack.mtxWorld);
         UfoundLost.heliPackDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliPack.mtxWorld);
     }
+})(UfoundLost || (UfoundLost = {}));
+var UfoundLost;
+(function (UfoundLost) {
+    class Splat extends UfoundLost.GameObject {
+        constructor(_name, _position) {
+            super(_name, _position, Splat.material, ƒ.Vector2.ONE(0.5));
+            this.hndTimer = (_event) => {
+                if (_event.lastCall) {
+                    UfoundLost.graph.removeChild(this);
+                }
+                let ratio = _event.count / Splat.frames;
+                let cmpMaterial = this.getComponent(ƒ.ComponentMaterial);
+                cmpMaterial.clrPrimary.a = ratio;
+            };
+            let cmpAudio = new ƒ.ComponentAudio(ƒ.Random.default.getElement(Splat.audio), false, true);
+            cmpAudio.volume = 1;
+            this.addComponent(cmpAudio);
+            ƒ.Time.game.setTimer(Splat.timeFrame, Splat.frames, this.hndTimer);
+            UfoundLost.graph.appendChild(this);
+        }
+        static create(_position, _alien = false) {
+            let splat = new Splat("Splat", _position);
+            splat.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS(_alien ? "lime" : "red");
+        }
+    }
+    Splat.frames = 20;
+    Splat.timeFrame = 30;
+    Splat.audio = [
+        new ƒ.Audio("Audio/Splat0.mp3"), new ƒ.Audio("Audio/Splat1.mp3"), new ƒ.Audio("Audio/Splat2.mp3")
+    ];
+    Splat.material = new ƒ.Material("Splat", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"), new ƒ.TextureImage("Images/Splat.png")));
+    UfoundLost.Splat = Splat;
 })(UfoundLost || (UfoundLost = {}));
 var UfoundLost;
 (function (UfoundLost) {
@@ -562,7 +603,8 @@ var UfoundLost;
                 return;
             if (this.mtxLocal.translation.y > 0)
                 return;
-            ƒ.Debug.log("Splat!");
+            // ƒ.Debug.log("Splat!");
+            UfoundLost.Splat.create(this.mtxLocal.translation);
             Villager.all.removeChild(this);
             if (this.ufo)
                 this.ufo.loseVillager();
@@ -581,6 +623,7 @@ var UfoundLost;
         }
         loseUfo() {
             this.ufo = null;
+            this.fall();
         }
     }
     Villager.all = new ƒ.Node("Villagers");

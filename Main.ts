@@ -2,7 +2,6 @@ namespace UfoundLost {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
 
-  window.addEventListener("load", start);
 
 
   const yCamera: number = 4;
@@ -18,8 +17,27 @@ namespace UfoundLost {
   let flak: Flak;
   let heliPack: HeliPack;
 
-  function start(_event: Event): void {
+  window.addEventListener("load", waitForInteraction);
+  let canvas: HTMLCanvasElement;
+
+  function waitForInteraction(_event: Event): void {
+    canvas = document.querySelector("canvas");
+    let dialog: HTMLDialogElement = document.querySelector("dialog");
+    dialog.addEventListener("click", () => {
+      document.querySelector("dialog").close();
+      start();
+    });
+  }
+
+  async function start(): Promise<void> {
     ƒ.Debug.log("UfoundLost starts");
+    
+    document.querySelector("div").style.display = "block";
+    canvas.addEventListener("click", canvas.requestPointerLock);
+    await new Promise((_resolve) => { canvas.addEventListener("click", _resolve);});
+    document.querySelector("div").style.display = "none";
+
+    setupInteraction();
 
     createViewport();
     createScene();
@@ -40,7 +58,6 @@ namespace UfoundLost {
     graph.addComponent(cmpAudio);
 
 
-    setupInteraction();
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();
@@ -58,14 +75,9 @@ namespace UfoundLost {
     viewport.draw();
   }
 
-  function setupInteraction(): void {
-    let canvas: HTMLCanvasElement | null = document.querySelector("canvas");
-    if (!canvas)
-      return;
-
+  function setupInteraction(): void {    
     canvas.addEventListener("mousemove", hndMouse);
     canvas.addEventListener("wheel", hndMouse);
-    canvas.addEventListener("click", canvas.requestPointerLock);
     canvas.addEventListener("pointerdown", (_event: MouseEvent) => flak.shoot());
 
     cntHeliPack.x.setDelay(cntHeliPack.delay);

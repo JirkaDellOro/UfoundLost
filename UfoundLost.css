@@ -1,11 +1,26 @@
-* {
+html, body, canvas, img, dialog {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
 canvas {
   width: 100vw;
   height: 100vh;
+  background-color: black;
+}
+
+dialog {
+  cursor: pointer;
+}
+
+div {
+  display: none;
+  position: fixed;
+  text-align: center;
+  color: coral;
+  top:20px;
+  width: 100%;
 }
