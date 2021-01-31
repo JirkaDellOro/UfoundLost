@@ -67,10 +67,15 @@ namespace UfoundLost {
       this.getComponent(ƒ.ComponentMesh).pivot.rotateZ(this.rotation, true);
 
       if (!this.falling) return;
-      if (this.mtxLocal.translation.y > 0) return;
 
-      // ƒ.Debug.log("Splat!");
-      Splat.create(this.mtxLocal.translation);
+      let heliCatch: HELI = heliPack.catch(this);
+      if (heliCatch == HELI.NONE && this.mtxLocal.translation.y > 0) return;
+
+      if (heliCatch != HELI.CAUGHT)
+        Splat.create(this.mtxLocal.translation);
+      else
+        ƒ.Debug.log("Villager saved!");
+        
       Villager.all.removeChild(this);
       if (this.ufo)
         this.ufo.loseVillager();

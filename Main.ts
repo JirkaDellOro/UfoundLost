@@ -15,7 +15,7 @@ namespace UfoundLost {
   const cntHeliPack = { x: new ƒ.Control("HeliPackX", 0.1), z: new ƒ.Control("HeliPackZ", 0.1), delay: 500 };
 
   let flak: Flak;
-  let heliPack: HeliPack;
+  export let heliPack: HeliPack;
 
   window.addEventListener("load", waitForInteraction);
   let canvas: HTMLCanvasElement;

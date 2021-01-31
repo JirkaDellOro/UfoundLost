@@ -147,6 +147,12 @@ var UfoundLost;
 var UfoundLost;
 (function (UfoundLost) {
     var ƒAid = FudgeAid;
+    let HELI;
+    (function (HELI) {
+        HELI[HELI["NONE"] = 0] = "NONE";
+        HELI[HELI["CAUGHT"] = 1] = "CAUGHT";
+        HELI[HELI["SPLAT"] = 2] = "SPLAT";
+    })(HELI = UfoundLost.HELI || (UfoundLost.HELI = {}));
     class HeliPack extends UfoundLost.GameObject {
         constructor(_position, _size) {
             super("HeliPack", _position, HeliPack.mtrCatcherBox);
@@ -160,18 +166,35 @@ var UfoundLost;
             let net = new UfoundLost.GameObject("Net", ƒ.Vector3.Y(-0.1), HeliPack.mtrNet, new ƒ.Vector2(_size.x, _size.z), ƒ.Vector3.X(-90));
             net.getComponent(ƒ.ComponentMaterial).pivot.scale(ƒ.Vector2.ONE(2));
             this.appendChild(net);
-            let catcher = new ƒAid.Node("Catcher", ƒ.Matrix4x4.IDENTITY(), HeliPack.mtrCatcherBox, HeliPack.mesh);
-            let cmpMeshCatcher = catcher.getComponent(ƒ.ComponentMesh);
+            this.catcher = new ƒAid.Node("Catcher", ƒ.Matrix4x4.IDENTITY(), HeliPack.mtrCatcherBox, HeliPack.mesh);
+            let cmpMeshCatcher = this.catcher.getComponent(ƒ.ComponentMesh);
             cmpMeshCatcher.pivot.translateY(-0.1);
             cmpMeshCatcher.pivot.scale(_size);
             cmpMeshCatcher.pivot.scaleY(0.5);
             // cmpMeshCatcher.activate(false);
-            this.appendChild(catcher);
+            this.appendChild(this.catcher);
+            this.calculateBox();
         }
         input(_x, _z) {
             let move = new ƒ.Vector3(_x, 0, _z);
             this.mtxLocal.translate(move);
             this.restrictPosition(UfoundLost.heliSpaceDefinition.min, UfoundLost.heliSpaceDefinition.max);
+            this.calculateBox();
+        }
+        catch(_character) {
+            let position = _character.mtxWorld.translation;
+            for (let iHeli = 0; iHeli < 4; iHeli++) {
+                if (position.isInsideSphere(this.getChild(iHeli).mtxWorld.translation, 0.5))
+                    return HELI.SPLAT;
+            }
+            if (position.isInsideCube(this.minBox, this.maxBox))
+                return HELI.CAUGHT;
+            return HELI.NONE;
+        }
+        calculateBox() {
+            let cmpMeshCatcher = this.catcher.getComponent(ƒ.ComponentMesh);
+            this.minBox = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshCatcher.mtxWorld);
+            this.maxBox = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshCatcher.mtxWorld);
         }
     }
     HeliPack.mesh = new ƒ.MeshCube("HeliPack");
@@ -207,7 +230,6 @@ var UfoundLost;
     const cntFlak = { x: new ƒ.Control("FlakX", 0.05), z: new ƒ.Control("FlakZ", 0.03), y: new ƒ.Control("FlakY", -0.001) };
     const cntHeliPack = { x: new ƒ.Control("HeliPackX", 0.1), z: new ƒ.Control("HeliPackZ", 0.1), delay: 500 };
     let flak;
-    let heliPack;
     window.addEventListener("load", waitForInteraction);
     let canvas;
     function waitForInteraction(_event) {
@@ -261,7 +283,7 @@ var UfoundLost;
             + ƒ.Keyboard.mapToValue(-1, 0, [ƒ.KEYBOARD_CODE.W, ƒ.KEYBOARD_CODE.ARROW_UP]));
         cntHeliPack.x.setInput(ƒ.Keyboard.mapToValue(-1, 0, [ƒ.KEYBOARD_CODE.A, ƒ.KEYBOARD_CODE.ARROW_LEFT])
             + ƒ.Keyboard.mapToValue(1, 0, [ƒ.KEYBOARD_CODE.D, ƒ.KEYBOARD_CODE.ARROW_RIGHT]));
-        heliPack.input(cntHeliPack.x.getOutput(), cntHeliPack.z.getOutput());
+        UfoundLost.heliPack.input(cntHeliPack.x.getOutput(), cntHeliPack.z.getOutput());
     }
     function hndMouse(_event) {
         cntFlak.x.setInput(_event.movementX);
@@ -308,8 +330,8 @@ var UfoundLost;
         //     graph.appendChild(floor);
         //   }
         // }
-        heliPack = new UfoundLost.HeliPack(ƒ.Vector3.Y(UfoundLost.heliPackDefinition.height), UfoundLost.heliPackDefinition.size);
-        UfoundLost.graph.appendChild(heliPack);
+        UfoundLost.heliPack = new UfoundLost.HeliPack(ƒ.Vector3.Y(UfoundLost.heliPackDefinition.height), UfoundLost.heliPackDefinition.size);
+        UfoundLost.graph.appendChild(UfoundLost.heliPack);
         let meshCube = new ƒ.MeshCube();
         let ufoSpace = new ƒAid.Node("UfoSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, UfoundLost.ufoSpaceDefinition.height, 0)), mtrWhite, meshCube);
         let cmpMeshUfoSpace = ufoSpace.getComponent(ƒ.ComponentMesh);
@@ -328,7 +350,7 @@ var UfoundLost;
         UfoundLost.ufoSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshUfoSpace.mtxWorld);
         UfoundLost.heliSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliSpace.mtxWorld);
         UfoundLost.heliSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliSpace.mtxWorld);
-        let cmpMeshHeliPack = heliPack.getChildrenByName("Catcher")[0].getComponent(ƒ.ComponentMesh);
+        let cmpMeshHeliPack = UfoundLost.heliPack.getChildrenByName("Catcher")[0].getComponent(ƒ.ComponentMesh);
         UfoundLost.heliPackDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliPack.mtxWorld);
         UfoundLost.heliPackDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliPack.mtxWorld);
     }
@@ -601,10 +623,13 @@ var UfoundLost;
             this.getComponent(ƒ.ComponentMesh).pivot.rotateZ(this.rotation, true);
             if (!this.falling)
                 return;
-            if (this.mtxLocal.translation.y > 0)
+            let heliCatch = UfoundLost.heliPack.catch(this);
+            if (heliCatch == UfoundLost.HELI.NONE && this.mtxLocal.translation.y > 0)
                 return;
-            // ƒ.Debug.log("Splat!");
-            UfoundLost.Splat.create(this.mtxLocal.translation);
+            if (heliCatch != UfoundLost.HELI.CAUGHT)
+                UfoundLost.Splat.create(this.mtxLocal.translation);
+            else
+                ƒ.Debug.log("Villager saved!");
             Villager.all.removeChild(this);
             if (this.ufo)
                 this.ufo.loseVillager();

@@ -17,6 +17,7 @@ dialog {
 }
 
 div {
+  pointer-events: none;
   display: none;
   position: fixed;
   text-align: center;
