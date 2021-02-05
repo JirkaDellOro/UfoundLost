@@ -16,7 +16,7 @@
       "../Source/Engine/Recycler.ts",
       "../Source/Math/Vector2.ts",
       "../Source/Math/Rectangle.ts",
-      "../Source/Render/RenderOperator.ts",
+      "../Source/Render/RenderWebGL.ts",
       "../Source/Render/RenderInjectorTexture.ts",
       "../Source/Graph/Node.ts",
       "../Source/References.ts",
@@ -85,7 +85,7 @@
       "../Source/Physics/Quaternion.ts",
       "../Source/Ray/Ray.ts",
       "../Source/Ray/RayHit.ts",
-      "../Source/Render/RenderManager.ts",
+      "../Source/Render/Render.ts",
       "../Source/Render/RenderParticles.ts",
       "../Source/Shader/Shader.ts",
       "../Source/Shader/ShaderFlat.ts",
@@ -115,7 +115,7 @@
         },
         {
           "pos": 593,
-          "end": 590379,
+          "end": 590375,
           "kind": "text"
         }
       ],
@@ -152,7 +152,7 @@
         },
         {
           "pos": 57,
-          "end": 236178,
+          "end": 236466,
           "kind": "text"
         }
       ]
