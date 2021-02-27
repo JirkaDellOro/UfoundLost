@@ -9,7 +9,7 @@ namespace UfoundLost {
 
     constructor(_position: ƒ.Vector3) {
       super("Detonation", _position, Detonation.material, ƒ.Vector2.ONE(Detonation.radius));
-      // this.getComponent(ƒ.ComponentMaterial).pivot.scaling = ƒ.Vector2.ONE(10);
+      this.getComponent(ƒ.ComponentMaterial).sortForAlpha = true;
       this.velocity = ƒ.Vector3.Y(0.3);
       let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(Detonation.audio);
       this.addComponent(cmpAudio);

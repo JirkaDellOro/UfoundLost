@@ -163,7 +163,7 @@ var UfoundLost;
     class Detonation extends UfoundLost.GameObject {
         constructor(_position) {
             super("Detonation", _position, Detonation.material, ƒ.Vector2.ONE(Detonation.radius));
-            // this.getComponent(ƒ.ComponentMaterial).pivot.scaling = ƒ.Vector2.ONE(10);
+            this.getComponent(ƒ.ComponentMaterial).sortForAlpha = true;
             this.velocity = ƒ.Vector3.Y(0.3);
             let cmpAudio = new ƒ.ComponentAudio(Detonation.audio);
             this.addComponent(cmpAudio);
@@ -473,13 +473,11 @@ var UfoundLost;
         let cmpMeshUfoSpace = ufoSpace.getComponent(ƒ.ComponentMesh);
         cmpMeshUfoSpace.pivot.scale(UfoundLost.ufoSpaceDefinition.size);
         ufoSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("red", 0.5);
-        cmpMeshUfoSpace.activate(false);
         UfoundLost.graph.appendChild(ufoSpace);
         let heliSpace = new ƒAid.Node("HeliSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, UfoundLost.heliSpaceDefinition.height, 0)), mtrWhite, meshCube);
         let cmpMeshHeliSpace = heliSpace.getComponent(ƒ.ComponentMesh);
         cmpMeshHeliSpace.pivot.scale(UfoundLost.heliSpaceDefinition.size);
         heliSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("grey", 0.5);
-        cmpMeshHeliSpace.activate(false);
         UfoundLost.graph.appendChild(heliSpace);
         UfoundLost.viewport.draw(); // to calculate world transforms
         UfoundLost.ufoSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshUfoSpace.mtxWorld);
@@ -489,6 +487,8 @@ var UfoundLost;
         let cmpMeshHeliPack = UfoundLost.heliPack.getChildrenByName("Catcher")[0].getComponent(ƒ.ComponentMesh);
         UfoundLost.heliPackDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliPack.mtxWorld);
         UfoundLost.heliPackDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliPack.mtxWorld);
+        cmpMeshUfoSpace.activate(false);
+        cmpMeshHeliSpace.activate(false);
     }
 })(UfoundLost || (UfoundLost = {}));
 var UfoundLost;

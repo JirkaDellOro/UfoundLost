@@ -167,26 +167,26 @@ namespace UfoundLost {
     let cmpMeshUfoSpace: ƒ.ComponentMesh = ufoSpace.getComponent(ƒ.ComponentMesh);
     cmpMeshUfoSpace.pivot.scale(ufoSpaceDefinition.size);
     ufoSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("red", 0.5);
-    cmpMeshUfoSpace.activate(false)
     graph.appendChild(ufoSpace);
-
+    
     let heliSpace: ƒ.Node = new ƒAid.Node("HeliSpace", ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(0, heliSpaceDefinition.height, 0)), mtrWhite, meshCube);
     let cmpMeshHeliSpace: ƒ.ComponentMesh = heliSpace.getComponent(ƒ.ComponentMesh);
     cmpMeshHeliSpace.pivot.scale(heliSpaceDefinition.size);
     heliSpace.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("grey", 0.5);
-    cmpMeshHeliSpace.activate(false)
     graph.appendChild(heliSpace);
-
-
+    
+    
     viewport.draw(); // to calculate world transforms
-
+    
     ufoSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshUfoSpace.mtxWorld);
     ufoSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshUfoSpace.mtxWorld);
     heliSpaceDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliSpace.mtxWorld);
     heliSpaceDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliSpace.mtxWorld);
-
+    
     let cmpMeshHeliPack: ƒ.ComponentMesh = heliPack.getChildrenByName("Catcher")[0].getComponent(ƒ.ComponentMesh);
     heliPackDefinition.min = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(-0.5), cmpMeshHeliPack.mtxWorld);
     heliPackDefinition.max = ƒ.Vector3.TRANSFORMATION(ƒ.Vector3.ONE(0.5), cmpMeshHeliPack.mtxWorld);
+    cmpMeshUfoSpace.activate(false)
+    cmpMeshHeliSpace.activate(false)
   }
 }
